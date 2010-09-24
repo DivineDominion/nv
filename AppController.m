@@ -1532,7 +1532,7 @@ terminateApp:
 - (void)preview:(id)context
 {
 	NSString* processedString = [NSString stringWithProcessedMarkdown:[textView string]];
-	NSString* htmlString = [NSString stringWithFormat:@"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html><head><style type=\"text/css\">body { font-family: Helvetica, sans-serif; }</style></head><body>%@</body></html>", processedString];
+	NSString* htmlString = [NSString stringWithFormat:@"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html><head><style type=\"text/css\">body { font-family: Lucida Grande, sans-serif; font-size: 1.1em; line-height: 1.5em;}</style></head><body>%@</body></html>", processedString];
 	
 	[[webView mainFrame] loadHTMLString:htmlString baseURL:nil];
 }
