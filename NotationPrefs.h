@@ -14,7 +14,7 @@ including encryption, file formats, synchronization, passwords management, and o
 
 #define EPOC_ITERATION 3
 
-enum { SingleDatabaseFormat = 0, PlainTextFormat, RTFTextFormat, HTMLFormat, WordDocFormat, WordXMLFormat };
+enum { SingleDatabaseFormat = 0, PlainTextFormat, MarkupTextFormat, RTFTextFormat, HTMLFormat, WordDocFormat, WordXMLFormat };
 
 extern NSString *SyncPrefsDidChangeNotification;
 

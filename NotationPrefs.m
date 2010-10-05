@@ -181,6 +181,9 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
     switch (formatID) {
 	case SingleDatabaseFormat:
 	    return [NSMutableArray arrayWithCapacity:0];
+	case MarkupTextFormat: 
+		// TODO check compatibility
+		// (fall-through intended)
 	case PlainTextFormat: 
 	    return [NSMutableArray arrayWithObjects:[(id)UTCreateStringForOSType(TEXT_TYPE_ID) autorelease], 
 			[(id)UTCreateStringForOSType(UTXT_TYPE_ID) autorelease], nil];
@@ -203,6 +206,8 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
 	    return [NSMutableArray arrayWithCapacity:0];
 	case PlainTextFormat: 
 	    return [NSMutableArray arrayWithObjects:@"txt", @"text", @"utf8", nil];
+	case MarkupTextFormat:
+		return [NSMutableArray arrayWithObjects:@"md", @"mmd", @"mdown", @"markdown", @"textile", nil];
 	case RTFTextFormat: 
 	    return [NSMutableArray arrayWithObjects:@"rtf", nil];
 	case HTMLFormat:
@@ -811,7 +816,9 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
 	case SingleDatabaseFormat:
 	case PlainTextFormat:
 	    
-	    return @"txt";
+	    return @"md"; //txt
+	case MarkupTextFormat:
+		return @"md";
 	case RTFTextFormat:
 	    
 	    return @"rtf";

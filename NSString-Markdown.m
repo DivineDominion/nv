@@ -4,8 +4,9 @@
 
 + (NSString*)stringWithProcessedMarkdown:(NSString*)inputString
 {
-	NSString* mdScriptPath = @"~/Library/Application Support/MultiMarkdown/bin/mmd2XHTML.pl";
+	// NSString* mdScriptPath = @"~/Library/Application Support/MultiMarkdown/bin/mmd2XHTML.pl";
 	// NSString* mdScriptPath = [[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Markdown_1.0.1"] stringByAppendingPathComponent:@"Markdown.pl"];
+    NSString* mdScriptPath = [[[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"MultiMarkdown"] stringByAppendingPathComponent:@"bin"] stringByAppendingPathComponent:@"mmd2ZettelXHTML.pl"];
 	
 	NSTask* task = [[NSTask alloc] init];
 	NSMutableArray* args = [NSMutableArray array];
