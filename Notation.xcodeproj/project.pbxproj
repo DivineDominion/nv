@@ -150,6 +150,7 @@
 		21F459AD0A92E01D00FB6FFE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F4599B0A92E01C00FB6FFE /* Carbon.framework */; };
 		21FF94F30B5AD22800DB6A2F /* ExporterManager.nib in Resources */ = {isa = PBXBuildFile; fileRef = 21FF94ED0B5AD22800DB6A2F /* ExporterManager.nib */; };
 		21FF94F70B5AD23B00DB6A2F /* ExporterManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FF94F50B5AD23B00DB6A2F /* ExporterManager.m */; };
+		604DCC1E12621F8100E183FF /* NSString_MultiMarkdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 604DCC1D12621F8100E183FF /* NSString_MultiMarkdown.m */; };
 		607221EF125B5E1D001AFAA2 /* MultiMarkdown in Resources */ = {isa = PBXBuildFile; fileRef = 60722192125B5E1D001AFAA2 /* MultiMarkdown */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -419,6 +420,8 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Notation_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Notation_Prefix.pch; sourceTree = "<group>"; };
+		604DCC1C12621F8100E183FF /* NSString_MultiMarkdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSString_MultiMarkdown.h; sourceTree = "<group>"; };
+		604DCC1D12621F8100E183FF /* NSString_MultiMarkdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSString_MultiMarkdown.m; sourceTree = "<group>"; };
 		60722192125B5E1D001AFAA2 /* MultiMarkdown */ = {isa = PBXFileReference; lastKnownFileType = folder; path = MultiMarkdown; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Notational Velocity.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Notational Velocity.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -793,6 +796,8 @@
 				214495040ADC7F4F00E2A2B6 /* SFPasswordAssistantInspectorController.h */,
 				213FAD510B3C6B52004C74BD /* FSExchangeObjectsCompat.h */,
 				213FAD520B3C6B52004C74BD /* FSExchangeObjectsCompat.c */,
+				604DCC1C12621F8100E183FF /* NSString_MultiMarkdown.h */,
+				604DCC1D12621F8100E183FF /* NSString_MultiMarkdown.m */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
@@ -1036,6 +1041,7 @@
 				21AD2850110BE99B00B7A985 /* SyncSessionController.m in Sources */,
 				212C6952110E1940004DD82C /* TitlebarButton.m in Sources */,
 				F1C037F511239013000AC534 /* NSString-Markdown.m in Sources */,
+				604DCC1E12621F8100E183FF /* NSString_MultiMarkdown.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1475,7 +1481,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx10.4;
+				SDKROOT = macosx10.5;
 				"SDKROOT[arch=x86_64]" = macosx10.5;
 			};
 			name = Development;
@@ -1493,14 +1499,14 @@
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_THREADSAFE_STATICS = NO;
 				GCC_VERSION = 4.2;
-				"GCC_VERSION[sdk=macosx10.4][arch=*]" = 4.0;
+				"GCC_VERSION[arch=*]" = 4.0;
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
-				SDKROOT = macosx10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				"MACOSX_DEPLOYMENT_TARGET[arch=i386]" = 10.5;
+				SDKROOT = macosx10.5;
 				"SDKROOT[arch=x86_64]" = macosx10.5;
 			};
 			name = Deployment;

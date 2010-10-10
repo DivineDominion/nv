@@ -25,27 +25,27 @@
 #import "URLGetter.h"
 #import "LinearDividerShader.h"
 #import "NSString-Markdown.h"
+#import "NSString_MultiMarkdown.h"
 #import <WebKit/WebArchive.h>
 #include <Carbon/Carbon.h>
 
-@interface AppController ()
-
-- (void)requestPreviewUpdate;
-
-@end
-
 @implementation AppController
+
+@synthesize window;
+@synthesize previewWindow;
+@synthesize isPreviewOutdated;
 
 //an instance of this class is designated in the nib as the delegate of the window, nstextfield and two nstextviews
 
 - (id)init {
-    if ([super init]) {
+    if ((self = [super init])) {
 		
 		windowUndoManager = [[NSUndoManager alloc] init];
-		
+        
 		dividerShader = [[LinearDividerShader alloc] initWithStartColor:[NSColor colorWithCalibratedWhite:0.988 alpha:1.0] 
 															   endColor:[NSColor colorWithCalibratedWhite:0.875 alpha:1.0]];
-		
+
+		isPreviewOutdated = YES; // toggle default first rendering
 		isCreatingANote = isFilteringFromTyping = typedStringIsCached = NO;
 		typedString = @"";
 		
@@ -1138,7 +1138,7 @@ terminateApp:
 	
 	if (textObject == textView) {
 		[currentNote setContentString:[textView textStorage]];
-		[self requestPreviewUpdate];
+		[self requestPreviewUpdate]; // TODO: above call triggers text update?
 	}
 }
 
@@ -1518,23 +1518,53 @@ terminateApp:
 	[self setEmptyViewState:currentNote == nil];
 }
 
-- (NSWindow*)window {
-	return window;
-}
-
-- (void)requestPreviewUpdate // this is a proxy for `preview:`
+- (IBAction)switchPreviewRenderingMode:(id)sender
 {
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(preview:) object:nil];
-	
-	[self performSelector:@selector(preview:) withObject:nil afterDelay:0.5];
-}
+    // TODO implement
+} // switchPreviewRenderingMode
 
-- (void)preview:(id)context
+- (IBAction)togglePreviewWindow:(id)sender
 {
-	NSString* processedString = [NSString stringWithProcessedMarkdown:[textView string]];
+    if ([previewWindow isVisible]) {        
+        [previewWindow orderOut:self];
+    } else {
+        if (self.isPreviewOutdated) {
+            [self updatePreview:nil];
+        }
+        
+        [previewWindow orderFront:self];
+    }
+
+} // togglePreviewWindow
+
+- (void)requestPreviewUpdate
+{
+    // abort when window is not shown to avoid lags
+    if (![previewWindow isVisible]) {
+        self.isPreviewOutdated = YES;
+        return;
+    }
+    
+    [NSObject cancelPreviousPerformRequestsWithTarget:self 
+                                             selector:@selector(updatePreview:) 
+                                               object:nil];
 	
-	[[webView mainFrame] loadHTMLString:processedString baseURL:nil];
-}
+	[self performSelector:@selector(updatePreview:) 
+               withObject:nil 
+               afterDelay:0.5];
+} // updatePreview
+
+- (void)updatePreview:(id)context
+{
+    NSString* input = [textView string];
+	NSString* processedString = [NSString stringWithProcessedMultiMarkdown:input];
+	
+    NSLog(processedString);
+	[[previewWebView mainFrame] loadHTMLString:processedString 
+                                       baseURL:nil];
+    
+    self.isPreviewOutdated = NO;
+} // preview
 
 
 @end

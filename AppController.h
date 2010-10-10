@@ -27,7 +27,12 @@
     IBOutlet NSWindow *window;
 	IBOutlet NSPanel *syncWaitPanel;
 	IBOutlet NSProgressIndicator *syncWaitSpinner;
-	IBOutlet WebView *webView;
+	
+    // Rendered Text Preview
+    IBOutlet NSWindow *previewWindow;
+    IBOutlet WebView *previewWebView;
+    BOOL isPreviewOutdated;
+    
 	NSToolbar *toolbar;
 	NSToolbarItem *dualFieldItem;
 	TitlebarButton *titleBarButton;
@@ -51,6 +56,10 @@
 	NoteObject *currentNote;
 	NSArray *savedSelectedNotes;
 }
+
+@property (readonly) NSWindow *window;
+@property (readonly) NSWindow *previewWindow;
+@property BOOL isPreviewOutdated;
 
 void outletObjectAwoke(id sender);
 
@@ -93,5 +102,11 @@ void outletObjectAwoke(id sender);
 - (IBAction)toggleNVActivation:(id)sender;
 - (IBAction)bringFocusToControlField:(id)sender;
 - (NSWindow*)window;
+
+- (NSWindow *)previewWindow;
+- (IBAction)switchPreviewRenderingMode:(id)sender;
+- (IBAction)togglePreviewWindow:(id)sender;
+- (void)requestPreviewUpdate;
+- (void)updatePreview:(id)context;
 
 @end
