@@ -1433,7 +1433,8 @@ terminateApp:
 }
 
 - (void)windowWillClose:(NSNotification *)aNotification {
-    if ([prefsController quitWhenClosingWindow])
+    if ([prefsController quitWhenClosingWindow]
+        && [aNotification object] == self.window )
 		[NSApp terminate:nil];
 }
 
