@@ -1559,7 +1559,6 @@ terminateApp:
     NSString* input = [textView string];
 	NSString* processedString = [NSString stringWithProcessedMultiMarkdown:input];
 	
-    NSLog(processedString);
 	[[previewWebView mainFrame] loadHTMLString:processedString 
                                        baseURL:nil];
     
