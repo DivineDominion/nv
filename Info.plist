@@ -101,6 +101,8 @@
 				<string>text</string>
 				<string>utf8</string>
 				<string>utxt</string>
+				<string>md</string>
+				<string>markdown</string>
 			</array>
 			<key>CFBundleTypeName</key>
 			<string>NSStringPboardType</string>
@@ -132,7 +134,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Notational Velocity</string>
 	<key>CFBundleGetInfoString</key>
-	<string>2.0 β3, Copyright © 2010 Zachary Schneirov, All Rights Reserved.</string>
+	<string>2.0 β3mmd2, Copyright © 2010 Zachary Schneirov, Christian Tietze, All Rights Reserved.</string>
 	<key>CFBundleIconFile</key>
 	<string>Notality</string>
 	<key>CFBundleIdentifier</key>
@@ -142,21 +144,21 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0 β3</string>
+	<string>2.0 β3mmd2</string>
 	<key>CFBundleSignature</key>
 	<string>N†l√</string>
 	<key>CFBundleVersion</key>
 	<string>6</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.4</string>
+	<string>10.5</string>
 	<key>LSMinimumSystemVersionByArchitecture</key>
 	<dict>
 		<key>i386</key>
-		<string>10.4.4</string>
+		<string>10.5</string>
 		<key>x86_64</key>
 		<string>10.6.0</string>
 		<key>ppc</key>
-		<string>10.4</string>
+		<string>10.5</string>
 	</dict>
 	<key>LSArchitecturePriority</key>
 	<array>

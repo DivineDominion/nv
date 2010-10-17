@@ -27,6 +27,7 @@
 @class RBSplitSubview;
 @class TitlebarButton;
 @class LinearDividerShader;
+@class PreviewController;
 
 @interface AppController : NSObject {
     IBOutlet DualField *field;
@@ -62,6 +63,8 @@
 	
 	NoteObject *currentNote;
 	NSArray *savedSelectedNotes;
+    
+    PreviewController *previewController;
 }
 
 void outletObjectAwoke(id sender);
@@ -111,4 +114,6 @@ void outletObjectAwoke(id sender);
 - (IBAction)bringFocusToControlField:(id)sender;
 - (NSWindow*)window;
 
+-(IBAction)togglePreview:(id)sender;
+-(void)postTextUpdate;
 @end

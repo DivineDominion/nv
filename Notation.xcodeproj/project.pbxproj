@@ -158,6 +158,17 @@
 		21FF94F70B5AD23B00DB6A2F /* ExporterManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FF94F50B5AD23B00DB6A2F /* ExporterManager.m */; };
 		57F27F7B11973A7F00C63ACF /* Notation.sdef in Resources */ = {isa = PBXBuildFile; fileRef = 57F27F7A11973A7F00C63ACF /* Notation.sdef */; };
 		57F27FB91197407400C63ACF /* SearchCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 57F27FB81197407400C63ACF /* SearchCommand.m */; };
+		608A24D21268DB9F00EEF326 /* NSString_Textile.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A24D11268DB9F00EEF326 /* NSString_Textile.m */; };
+		608A24F11268DCF900EEF326 /* Textile_2.12 in Resources */ = {isa = PBXBuildFile; fileRef = 608A24ED1268DCF900EEF326 /* Textile_2.12 */; };
+		608A24F81268DDC800EEF326 /* Markdown_1.0.1 in Resources */ = {isa = PBXBuildFile; fileRef = 608A24F31268DDC800EEF326 /* Markdown_1.0.1 */; };
+		608A24FB1268DDF200EEF326 /* NSString_Markdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A24FA1268DDF200EEF326 /* NSString_Markdown.m */; };
+		608A25651268DEAB00EEF326 /* MultiMarkdown in Resources */ = {isa = PBXBuildFile; fileRef = 608A25061268DEAB00EEF326 /* MultiMarkdown */; };
+		608A25661268DEAB00EEF326 /* NSString_MultiMarkdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A25641268DEAB00EEF326 /* NSString_MultiMarkdown.m */; };
+		608A25791268DF9700EEF326 /* MarkupPreview.xib in Resources */ = {isa = PBXBuildFile; fileRef = 608A25781268DF9700EEF326 /* MarkupPreview.xib */; };
+		608A25AF1268ECFA00EEF326 /* PreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A25AE1268ECFA00EEF326 /* PreviewController.m */; };
+		608A25B61268EE5E00EEF326 /* AppController_Preview.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A25B51268EE5E00EEF326 /* AppController_Preview.m */; };
+		608A267A1268FE4400EEF326 /* BWToolkitFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 608A26791268FE4400EEF326 /* BWToolkitFramework.framework */; };
+		608A267D1268FE7600EEF326 /* BWToolkitFramework.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 608A26791268FE4400EEF326 /* BWToolkitFramework.framework */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -171,6 +182,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				608A267D1268FE7600EEF326 /* BWToolkitFramework.framework in CopyFiles */,
 				213623FC0B92AA6E008C0830 /* Sparkle.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -453,6 +465,21 @@
 		57F27F7A11973A7F00C63ACF /* Notation.sdef */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.sdef; path = Notation.sdef; sourceTree = "<group>"; };
 		57F27FB71197407400C63ACF /* SearchCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchCommand.h; sourceTree = "<group>"; };
 		57F27FB81197407400C63ACF /* SearchCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchCommand.m; sourceTree = "<group>"; };
+		608A24D01268DB9F00EEF326 /* NSString_Textile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSString_Textile.h; sourceTree = "<group>"; };
+		608A24D11268DB9F00EEF326 /* NSString_Textile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSString_Textile.m; sourceTree = "<group>"; };
+		608A24ED1268DCF900EEF326 /* Textile_2.12 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Textile_2.12; sourceTree = "<group>"; };
+		608A24F31268DDC800EEF326 /* Markdown_1.0.1 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Markdown_1.0.1; sourceTree = "<group>"; };
+		608A24F91268DDF200EEF326 /* NSString_Markdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSString_Markdown.h; sourceTree = "<group>"; };
+		608A24FA1268DDF200EEF326 /* NSString_Markdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSString_Markdown.m; sourceTree = "<group>"; };
+		608A25061268DEAB00EEF326 /* MultiMarkdown */ = {isa = PBXFileReference; lastKnownFileType = folder; path = MultiMarkdown; sourceTree = "<group>"; };
+		608A25631268DEAB00EEF326 /* NSString_MultiMarkdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSString_MultiMarkdown.h; sourceTree = "<group>"; };
+		608A25641268DEAB00EEF326 /* NSString_MultiMarkdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSString_MultiMarkdown.m; sourceTree = "<group>"; };
+		608A25781268DF9700EEF326 /* MarkupPreview.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MarkupPreview.xib; sourceTree = "<group>"; };
+		608A25AD1268ECFA00EEF326 /* PreviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreviewController.h; sourceTree = "<group>"; };
+		608A25AE1268ECFA00EEF326 /* PreviewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreviewController.m; sourceTree = "<group>"; };
+		608A25B41268EE5E00EEF326 /* AppController_Preview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController_Preview.h; sourceTree = "<group>"; };
+		608A25B51268EE5E00EEF326 /* AppController_Preview.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController_Preview.m; sourceTree = "<group>"; };
+		608A26791268FE4400EEF326 /* BWToolkitFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BWToolkitFramework.framework; path = "/Users/ct/Coding/Mac/Interface Builder Plug-Ins/BWToolkit/BWToolkitFramework.framework"; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Notational Velocity.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Notational Velocity.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3EEC9FE106F66C70023D7F8 /* NVPasswordGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NVPasswordGenerator.m; sourceTree = "<group>"; };
@@ -475,6 +502,7 @@
 				21D583620B78F0CC00245E29 /* ApplicationServices.framework in Frameworks */,
 				219D254A1113FE34005E7DF5 /* SystemConfiguration.framework in Frameworks */,
 				21B54C021134F2E800E163A1 /* IOKit.framework in Frameworks */,
+				608A267A1268FE4400EEF326 /* BWToolkitFramework.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,8 +512,16 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				608A25B41268EE5E00EEF326 /* AppController_Preview.h */,
+				608A25B51268EE5E00EEF326 /* AppController_Preview.m */,
 				214498800AE1931700E2A2B6 /* UI Decision Classes */,
 				2191930609CFBED200586B15 /* View Classes */,
+				21F0793710EC5E21004FE56F /* Sync Services */,
+				212089CF0B0C2BCF00A15A69 /* Note Importing */,
+				2114C11409575BD400614E74 /* AppController.h */,
+				2114C11509575BD400614E74 /* AppController.m */,
+				608A25AD1268ECFA00EEF326 /* PreviewController.h */,
+				608A25AE1268ECFA00EEF326 /* PreviewController.m */,
 				21D60126098FDB46007440DF /* GlobalPrefs.h */,
 				21D60127098FDB46007440DF /* GlobalPrefs.m */,
 				2191982009D607C600586B15 /* PrefsWindowController.h */,
@@ -500,8 +536,6 @@
 				21469C8A0BEBA6A10094835F /* TemporaryFileCache.m */,
 				213621EF0B92414F008C0830 /* MultiTextFinder.h */,
 				213621F00B92414F008C0830 /* MultiTextFinder.m */,
-				2114C11409575BD400614E74 /* AppController.h */,
-				2114C11509575BD400614E74 /* AppController.m */,
 				21A30EA50971D11D0071E9AF /* FastListDataSource.h */,
 				21A30EA60971D11D0071E9AF /* FastListDataSource.m */,
 				21A6E6FB0974204F008436A9 /* LabelsListController.h */,
@@ -536,8 +570,6 @@
 				D3EEC9FE106F66C70023D7F8 /* NVPasswordGenerator.m */,
 				21B1BC341104D20E0004A7D0 /* InvocationRecorder.h */,
 				21B1BC351104D20E0004A7D0 /* InvocationRecorder.m */,
-				21F0793710EC5E21004FE56F /* Sync Services */,
-				212089CF0B0C2BCF00A15A69 /* Note Importing */,
 				57F27FB71197407400C63ACF /* SearchCommand.h */,
 				57F27FB81197407400C63ACF /* SearchCommand.m */,
 			);
@@ -548,6 +580,7 @@
 			isa = PBXGroup;
 			children = (
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				608A26791268FE4400EEF326 /* BWToolkitFramework.framework */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -815,6 +848,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				608A24F21268DD2200EEF326 /* Markup */,
 				21F07C7010EDED87004FE56F /* BSJSON */,
 				2182B38E106B2286008641E4 /* RBSplitView */,
 				21F1CD490B3A38CB001FB5F6 /* HotKeys */,
@@ -860,6 +894,7 @@
 				2110C0CF0B65F09E00F5C52E /* SavedSearches.nib */,
 				21E6B0950B6E6D0B001ABEDC /* URLGetter.nib */,
 				213621E70B92413F008C0830 /* FindPanel.nib */,
+				608A25781268DF9700EEF326 /* MarkupPreview.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -871,6 +906,22 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		608A24F21268DD2200EEF326 /* Markup */ = {
+			isa = PBXGroup;
+			children = (
+				608A25061268DEAB00EEF326 /* MultiMarkdown */,
+				608A25631268DEAB00EEF326 /* NSString_MultiMarkdown.h */,
+				608A25641268DEAB00EEF326 /* NSString_MultiMarkdown.m */,
+				608A24F31268DDC800EEF326 /* Markdown_1.0.1 */,
+				608A24F91268DDF200EEF326 /* NSString_Markdown.h */,
+				608A24FA1268DDF200EEF326 /* NSString_Markdown.m */,
+				608A24ED1268DCF900EEF326 /* Textile_2.12 */,
+				608A24D01268DB9F00EEF326 /* NSString_Textile.h */,
+				608A24D11268DB9F00EEF326 /* NSString_Textile.m */,
+			);
+			name = Markup;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -902,6 +953,7 @@
 			isa = PBXProject;
 			buildConfigurationList = 212B842709780B5000F3597F /* Build configuration list for PBXProject "Notation" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -992,6 +1044,10 @@
 				21F447F111B896C4004D008B /* Como funciona isso?.nvhelp in Resources */,
 				21F447F211B896C4004D008B /* Este é o título de uma nota.nvhelp in Resources */,
 				21F447F311B896C4004D008B /* Informações de Contato.nvhelp in Resources */,
+				608A24F11268DCF900EEF326 /* Textile_2.12 in Resources */,
+				608A24F81268DDC800EEF326 /* Markdown_1.0.1 in Resources */,
+				608A25651268DEAB00EEF326 /* MultiMarkdown in Resources */,
+				608A25791268DF9700EEF326 /* MarkupPreview.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1077,6 +1133,11 @@
 				212C6952110E1940004DD82C /* TitlebarButton.m in Sources */,
 				21B548FA112F307E00E163A1 /* NotationDirectoryManager.m in Sources */,
 				57F27FB91197407400C63ACF /* SearchCommand.m in Sources */,
+				608A24D21268DB9F00EEF326 /* NSString_Textile.m in Sources */,
+				608A24FB1268DDF200EEF326 /* NSString_Markdown.m in Sources */,
+				608A25661268DEAB00EEF326 /* NSString_MultiMarkdown.m in Sources */,
+				608A25AF1268ECFA00EEF326 /* PreviewController.m in Sources */,
+				608A25B61268EE5E00EEF326 /* AppController_Preview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1384,6 +1445,7 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_3)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_4)",
 					"\"$(SRCROOT)/French.lproj/RBSplitView(Sno).ibplugin/Contents/Frameworks\"",
+					"\"$(SRCROOT)/../Interface Builder Plug-Ins/BWToolkit\"",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Versions/A/Frameworks\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)\"";
@@ -1451,6 +1513,7 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_3)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_4)",
 					"\"$(SRCROOT)/French.lproj/RBSplitView(Sno).ibplugin/Contents/Frameworks\"",
+					"\"$(SRCROOT)/../Interface Builder Plug-Ins/BWToolkit\"",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Versions/A/Frameworks\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)\"";
@@ -1509,6 +1572,7 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_3)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_4)",
 					"\"$(SRCROOT)/French.lproj/RBSplitView(Sno).ibplugin/Contents/Frameworks\"",
+					"\"$(SRCROOT)/../Interface Builder Plug-Ins/BWToolkit\"",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Versions/A/Frameworks\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)\"";
@@ -1559,15 +1623,15 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_THREADSAFE_STATICS = NO;
-				"GCC_VERSION[sdk=macosx10.4][arch=*]" = 4.0;
+				"GCC_VERSION[sdk=macosx10.5][arch=*]" = 4.0;
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx10.4;
+				SDKROOT = macosx10.5;
 				"SDKROOT[arch=x86_64]" = macosx10.5;
 			};
 			name = Development;
@@ -1585,14 +1649,14 @@
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_THREADSAFE_STATICS = NO;
 				GCC_VERSION = 4.2;
-				"GCC_VERSION[sdk=macosx10.4][arch=*]" = 4.0;
+				"GCC_VERSION[sdk=macosx10.5][arch=*]" = 4.0;
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
-				SDKROOT = macosx10.4;
+				SDKROOT = macosx10.5;
 				"SDKROOT[arch=x86_64]" = macosx10.5;
 			};
 			name = Deployment;
@@ -1610,14 +1674,14 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_THREADSAFE_STATICS = NO;
-				"GCC_VERSION[sdk=macosx10.4][arch=*]" = 4.0;
+				"GCC_VERSION[sdk=macosx10.5][arch=*]" = 4.0;
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
-				SDKROOT = macosx10.4;
+				SDKROOT = macosx10.5;
 				"SDKROOT[arch=x86_64]" = macosx10.5;
 			};
 			name = Default;

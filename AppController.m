@@ -37,8 +37,11 @@
 #import "InvocationRecorder.h"
 #import "URLGetter.h"
 #import "LinearDividerShader.h"
+#import "PreviewController.h"
 #import <WebKit/WebArchive.h>
 #include <Carbon/Carbon.h>
+
+#define NSTextViewChangedNotification @"TextView has changed contents"
 
 @implementation AppController
 
@@ -49,6 +52,9 @@
 		
 		windowUndoManager = [[NSUndoManager alloc] init];
 
+        previewController = [[PreviewController alloc] init];
+        [[NSNotificationCenter defaultCenter] addObserver:previewController selector:@selector(requestPreviewUpdate:) name:NSTextViewChangedNotification object:self];
+        
 		// Setup URL Handling
 		NSAppleEventManager *appleEventManager = [NSAppleEventManager sharedAppleEventManager];
 		[appleEventManager setEventHandler:self andSelector:@selector(handleGetURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];	
@@ -65,7 +71,7 @@
 
 - (void)awakeFromNib {
 	prefsController = [GlobalPrefs defaultPrefs];
-	
+    
 	NSView *dualSV = [field superview];
 	dualFieldItem = [[NSToolbarItem alloc] initWithItemIdentifier:@"DualField"];
 	//[[dualSV superview] setFrameSize:NSMakeSize([[dualSV superview] frame].size.width, [[dualSV superview] frame].size.height -1)];
@@ -1149,7 +1155,8 @@ terminateApp:
 		
 		//restore string
 		[[textView textStorage] setAttributedString:[note contentString]];
-		
+		[self postTextUpdate];
+        
 		//[textView setAutomaticallySelectedRange:NSMakeRange(0,0)];
 		
 		//highlight terms--delay this, too
@@ -1179,6 +1186,7 @@ terminateApp:
 	
 	if (textObject == textView) {
 		[currentNote setContentString:[textView textStorage]];
+        [self postTextUpdate];
 	}
 }
 
@@ -1488,6 +1496,7 @@ terminateApp:
 	if (aNoteObject == currentNote) {
 		
 		[[textView textStorage] setAttributedString:[aNoteObject contentString]];
+        [self postTextUpdate];
 	}
 }
 
@@ -1521,7 +1530,7 @@ terminateApp:
 }
 
 - (void)windowWillClose:(NSNotification *)aNotification {
-    if ([prefsController quitWhenClosingWindow])
+    if ([prefsController quitWhenClosingWindow] && [[aNotification object] isEqual:self])
 		[NSApp terminate:nil];
 }
 
@@ -1590,8 +1599,10 @@ terminateApp:
 }
 
 - (void)dealloc {
+    [previewController release];
 	[windowUndoManager release];
 	[dividerShader release];
+    [self postTextUpdate];
 	
 	[super dealloc];
 }
@@ -1624,4 +1635,13 @@ terminateApp:
 	return window;
 }
 
+-(IBAction)togglePreview:(id)sender
+{
+    [previewController togglePreview:self];
+}
+
+-(void)postTextUpdate
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSTextViewChangedNotification object:self];
+}
 @end
