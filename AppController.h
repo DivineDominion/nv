@@ -29,6 +29,18 @@
 @class LinearDividerShader;
 @class PreviewController;
 
+#ifndef MarkdownPreview
+#define MarkdownPreview 13371
+#endif
+
+#ifndef MultiMarkdownPreview
+#define MultiMarkdownPreview 13372
+#endif
+
+#ifndef TextilePreview
+#define TextilePreview 13373
+#endif
+
 @interface AppController : NSObject {
     IBOutlet DualField *field;
 	IBOutlet RBSplitSubview *splitSubview;
@@ -65,6 +77,10 @@
 	NSArray *savedSelectedNotes;
     
     PreviewController *previewController;
+    IBOutlet NSMenuItem *markdownPreview;
+    IBOutlet NSMenuItem *multiMarkdownPreview;
+    IBOutlet NSMenuItem *textilePreview;
+    NSInteger currentPreviewMode;
 }
 
 void outletObjectAwoke(id sender);
@@ -116,4 +132,5 @@ void outletObjectAwoke(id sender);
 
 -(IBAction)togglePreview:(id)sender;
 -(void)postTextUpdate;
+-(IBAction)selectPreviewMode:(id)sender;
 @end

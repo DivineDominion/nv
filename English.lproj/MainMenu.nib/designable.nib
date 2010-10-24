@@ -21,7 +21,7 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="29"/>
+			<integer value="1115"/>
 			<integer value="1066"/>
 			<integer value="21"/>
 			<integer value="1079"/>
@@ -1161,6 +1161,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="45897863"/>
 									<reference key="NSMixedImage" ref="520021446"/>
+									<int key="NSTag">13371</int>
 								</object>
 								<object class="NSMenuItem" id="254502717">
 									<reference key="NSMenu" ref="260390050"/>
@@ -1169,6 +1170,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="45897863"/>
 									<reference key="NSMixedImage" ref="520021446"/>
+									<int key="NSTag">13372</int>
 								</object>
 								<object class="NSMenuItem" id="180216738">
 									<reference key="NSMenu" ref="260390050"/>
@@ -1177,6 +1179,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="45897863"/>
 									<reference key="NSMixedImage" ref="520021446"/>
+									<int key="NSTag">13373</int>
 								</object>
 								<object class="NSMenuItem" id="299803762">
 									<reference key="NSMenu" ref="260390050"/>
@@ -2338,6 +2341,54 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<reference key="destination" ref="529791966"/>
 					</object>
 					<int key="connectionID">1122</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">textilePreview</string>
+						<reference key="source" ref="290648732"/>
+						<reference key="destination" ref="180216738"/>
+					</object>
+					<int key="connectionID">1136</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">multiMarkdownPreview</string>
+						<reference key="source" ref="290648732"/>
+						<reference key="destination" ref="254502717"/>
+					</object>
+					<int key="connectionID">1137</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">markdownPreview</string>
+						<reference key="source" ref="290648732"/>
+						<reference key="destination" ref="865635529"/>
+					</object>
+					<int key="connectionID">1138</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectPreviewMode:</string>
+						<reference key="source" ref="290648732"/>
+						<reference key="destination" ref="180216738"/>
+					</object>
+					<int key="connectionID">1140</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectPreviewMode:</string>
+						<reference key="source" ref="290648732"/>
+						<reference key="destination" ref="254502717"/>
+					</object>
+					<int key="connectionID">1141</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectPreviewMode:</string>
+						<reference key="source" ref="290648732"/>
+						<reference key="destination" ref="865635529"/>
+					</object>
+					<int key="connectionID">1142</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -3694,7 +3745,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{729, 409}, {192, 93}}</string>
+					<string>{{728, 464}, {192, 93}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3781,7 +3832,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{324, 502}, {673, 20}}</string>
+					<string>{{323, 557}, {673, 20}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3909,7 +3960,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">1122</int>
+			<int key="maxID">1142</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -3929,6 +3980,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<string>importNotes:</string>
 							<string>printNote:</string>
 							<string>renameNote:</string>
+							<string>selectPreviewMode:</string>
 							<string>showHelpDocument:</string>
 							<string>showPreferencesWindow:</string>
 							<string>syncWaitQuit:</string>
@@ -3938,6 +3990,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -3966,6 +4019,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<string>importNotes:</string>
 							<string>printNote:</string>
 							<string>renameNote:</string>
+							<string>selectPreviewMode:</string>
 							<string>showHelpDocument:</string>
 							<string>showPreferencesWindow:</string>
 							<string>syncWaitQuit:</string>
@@ -4008,6 +4062,10 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">selectPreviewMode:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">showHelpDocument:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -4039,6 +4097,8 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>editorStatusView</string>
 							<string>field</string>
+							<string>markdownPreview</string>
+							<string>multiMarkdownPreview</string>
 							<string>notesTableView</string>
 							<string>sparkleUpdateItem</string>
 							<string>splitSubview</string>
@@ -4046,12 +4106,15 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<string>syncWaitPanel</string>
 							<string>syncWaitSpinner</string>
 							<string>textView</string>
+							<string>textilePreview</string>
 							<string>window</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>EmptyView</string>
 							<string>DualField</string>
+							<string>NSMenuItem</string>
+							<string>NSMenuItem</string>
 							<string>NotesTableView</string>
 							<string>NSMenuItem</string>
 							<string>RBSplitSubview</string>
@@ -4059,6 +4122,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<string>NSPanel</string>
 							<string>NSProgressIndicator</string>
 							<string>LinkingEditor</string>
+							<string>NSMenuItem</string>
 							<string>NSWindow</string>
 						</object>
 					</object>
@@ -4068,6 +4132,8 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>editorStatusView</string>
 							<string>field</string>
+							<string>markdownPreview</string>
+							<string>multiMarkdownPreview</string>
 							<string>notesTableView</string>
 							<string>sparkleUpdateItem</string>
 							<string>splitSubview</string>
@@ -4075,6 +4141,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<string>syncWaitPanel</string>
 							<string>syncWaitSpinner</string>
 							<string>textView</string>
+							<string>textilePreview</string>
 							<string>window</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -4086,6 +4153,14 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<object class="IBToOneOutletInfo">
 								<string key="name">field</string>
 								<string key="candidateClassName">DualField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">markdownPreview</string>
+								<string key="candidateClassName">NSMenuItem</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">multiMarkdownPreview</string>
+								<string key="candidateClassName">NSMenuItem</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">notesTableView</string>
@@ -4114,6 +4189,10 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							<object class="IBToOneOutletInfo">
 								<string key="name">textView</string>
 								<string key="candidateClassName">LinkingEditor</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">textilePreview</string>
+								<string key="candidateClassName">NSMenuItem</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">window</string>

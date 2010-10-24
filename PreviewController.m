@@ -6,6 +6,7 @@
 //  Copyright 2010
 
 #import "PreviewController.h"
+#import "AppController.h" // TODO for the defines only, can you get around that?
 #import "AppController_Preview.h"
 #import "NSString_MultiMarkdown.h"
 #import "NSString_Markdown.h"
@@ -57,11 +58,25 @@
 {
     AppController *app = object;
     NSString *rawString = [app noteContent];
-    NSString *processedString = [NSString stringWithProcessedMultiMarkdown:rawString];
+    SEL mode = [self markupProcessorSelector:[app currentPreviewMode]];
+    NSString *processedString = [NSString performSelector:mode withObject:rawString];
     
     [[preview mainFrame] loadHTMLString:processedString baseURL:nil];
     
     self.isPreviewOutdated = NO;
+}
+
+-(SEL)markupProcessorSelector:(NSInteger)previewMode
+{
+    if (previewMode == MarkdownPreview) {
+        return @selector(stringWithProcessedMarkdown:);
+    } else if (previewMode == MultiMarkdownPreview) {
+        return @selector(stringWithProcessedMultiMarkdown:);
+    } else if (previewMode == TextilePreview) {
+        return @selector(stringWithProcessedTextile:);
+    }
+    
+    return nil;
 }
 
 -(IBAction)saveHTML:(id)sender

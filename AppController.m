@@ -106,9 +106,12 @@
 	//this will not make a difference
 	[window useOptimizedDrawing:YES];
 	
-
 	//[window makeKeyAndOrderFront:self];
 	//[self setEmptyViewState:YES];
+    
+    // Enable one preview mode by default
+    [multiMarkdownPreview setState:NSOnState];
+    currentPreviewMode = MultiMarkdownPreview;
 	
 	outletObjectAwoke(self);
 }
@@ -367,12 +370,16 @@ terminateApp:
 	return [NSArray arrayWithObject:@"DualField"];
 }
 
-
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem {
 	SEL selector = [menuItem action];
 	int numberSelected = [notesTableView numberOfSelectedRows];
-	
-	if (selector == @selector(printNote:) || 
+    NSInteger tag = [menuItem tag];
+    
+    if ((tag == TextilePreview) || (tag == MarkdownPreview) || (tag == MultiMarkdownPreview)) {
+        // Allow only one Preview mode to be selected at every one time
+        [menuItem setState:((tag == currentPreviewMode) ? NSOnState : NSOffState)];
+        return YES;
+    } else if (selector == @selector(printNote:) || 
 		selector == @selector(deleteNote:) ||
 		selector == @selector(exportNote:) || 
 		selector == @selector(tagNote:)) {
@@ -1635,6 +1642,9 @@ terminateApp:
 	return window;
 }
 
+
+#pragma mark Preview-related and to be extracted into separate files
+
 -(IBAction)togglePreview:(id)sender
 {
     [previewController togglePreview:self];
@@ -1643,5 +1653,12 @@ terminateApp:
 -(void)postTextUpdate
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:NSTextViewChangedNotification object:self];
+}
+
+-(IBAction)selectPreviewMode:(id)sender
+{
+    NSMenuItem *previewItem = sender;
+    currentPreviewMode = [previewItem tag];
+    [self postTextUpdate];
 }
 @end

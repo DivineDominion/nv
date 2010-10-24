@@ -24,6 +24,6 @@
 -(IBAction)saveHTML:(id)sender;
 -(void)togglePreview:(id)sender;
 -(void)requestPreviewUpdate:(NSNotification *)notification;
-
+-(SEL)markupProcessorSelector:(NSInteger)previewMode;
 
 @end
