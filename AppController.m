@@ -42,10 +42,19 @@
 #include <Carbon/Carbon.h>
 
 #define NSTextViewChangedNotification @"TextView has changed contents"
+#define kDefaultMarkupPreviewMode @"markupPreviewMode"
 
 @implementation AppController
 
 //an instance of this class is designated in the nib as the delegate of the window, nstextfield and two nstextviews
+
++ (void)initialize
+{
+    NSDictionary *appDefaults = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:MultiMarkdownPreview]
+                                                            forKey:kDefaultMarkupPreviewMode];
+    
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+} // initialize
 
 - (id)init {
     if ([super init]) {
@@ -110,8 +119,15 @@
 	//[self setEmptyViewState:YES];
     
     // Enable one preview mode by default
-    [multiMarkdownPreview setState:NSOnState];
-    currentPreviewMode = MultiMarkdownPreview;
+    NSInteger previewMode = [[NSUserDefaults standardUserDefaults] integerForKey:kDefaultMarkupPreviewMode];
+    currentPreviewMode = previewMode;
+    if (previewMode == MarkdownPreview) {
+        [markdownPreview setState:NSOnState];
+    } else if (previewMode == MultiMarkdownPreview) {
+        [multiMarkdownPreview setState:NSOnState];
+    } else if (previewMode == TextilePreview) {
+        [textilePreview setState:NSOnState];
+    }
 	
 	outletObjectAwoke(self);
 }
@@ -1645,20 +1661,25 @@ terminateApp:
 
 #pragma mark Preview-related and to be extracted into separate files
 
--(IBAction)togglePreview:(id)sender
+- (IBAction)togglePreview:(id)sender
 {
     [previewController togglePreview:self];
 }
 
--(void)postTextUpdate
+- (void)postTextUpdate
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:NSTextViewChangedNotification object:self];
 }
 
--(IBAction)selectPreviewMode:(id)sender
+- (IBAction)selectPreviewMode:(id)sender
 {
     NSMenuItem *previewItem = sender;
     currentPreviewMode = [previewItem tag];
+    
+    // update user defaults
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:currentPreviewMode ]
+                                              forKey:kDefaultMarkupPreviewMode];
+    
     [self postTextUpdate];
 }
 @end
