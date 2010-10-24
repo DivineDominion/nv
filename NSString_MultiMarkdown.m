@@ -10,7 +10,7 @@
 
 @implementation NSString (MultiMarkdown)
 
-/*!
+/**
  * Locating a MultiMarkdown parsing script.  The options are as follows:
  *   1.  ~/Library/Application Support/MultiMarkdown/bin/mmd2ZettelXHTML.pl
  *   2.  ~/Library/Application Support/MultiMarkdown/bin/mmd2XHTML.pl
