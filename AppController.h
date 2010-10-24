@@ -1,5 +1,17 @@
 /* AppController */
 
+/*Copyright (c) 2010, Zachary Schneirov. All rights reserved.
+  Redistribution and use in source and binary forms, with or without modification, are permitted 
+  provided that the following conditions are met:
+   - Redistributions of source code must retain the above copyright notice, this list of conditions 
+     and the following disclaimer.
+   - Redistributions in binary form must reproduce the above copyright notice, this list of 
+	 conditions and the following disclaimer in the documentation and/or other materials provided with
+     the distribution.
+   - Neither the name of Notational Velocity nor the names of its contributors may be used to endorse 
+     or promote products derived from this software without specific prior written permission. */
+
+
 #import <Cocoa/Cocoa.h>
 
 #import "NotationController.h"
@@ -15,6 +27,7 @@
 @class RBSplitSubview;
 @class TitlebarButton;
 @class LinearDividerShader;
+@class PreviewController;
 
 @interface AppController : NSObject {
     IBOutlet DualField *field;
@@ -27,12 +40,6 @@
     IBOutlet NSWindow *window;
 	IBOutlet NSPanel *syncWaitPanel;
 	IBOutlet NSProgressIndicator *syncWaitSpinner;
-	
-    // Rendered Text Preview
-    IBOutlet NSWindow *previewWindow;
-    IBOutlet WebView *previewWebView;
-    BOOL isPreviewOutdated;
-    
 	NSToolbar *toolbar;
 	NSToolbarItem *dualFieldItem;
 	TitlebarButton *titleBarButton;
@@ -41,7 +48,8 @@
 	
 	LinearDividerShader *dividerShader;
 	
-	NSMutableArray *notesToOpenOnLaunch;
+	NSString *URLToSearchOnLaunch;
+	NSMutableArray *pathsToOpenOnLaunch;
 	
     NSUndoManager *windowUndoManager;
     PrefsWindowController *prefsWindowController;
@@ -55,15 +63,14 @@
 	
 	NoteObject *currentNote;
 	NSArray *savedSelectedNotes;
+    
+    PreviewController *previewController;
 }
-
-@property (readonly) NSWindow *window;
-@property (readonly) NSWindow *previewWindow;
-@property BOOL isPreviewOutdated;
 
 void outletObjectAwoke(id sender);
 
 - (void)setNotationController:(NotationController*)newNotation;
+- (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent;
 
 - (void)setupViewsAfterAppAwakened;
 - (void)runDelayedUIActionsAfterLaunch;
@@ -84,11 +91,15 @@ void outletObjectAwoke(id sender);
 - (BOOL)displayContentsForNoteAtIndex:(int)noteIndex;
 - (void)processChangedSelectionForTable:(NSTableView*)table;
 - (void)setEmptyViewState:(BOOL)state;
+- (void)cancelOperation:(id)sender;
 - (void)_setCurrentNote:(NoteObject*)aNote;
+- (void)_expandToolbar;
+- (void)_collapseToolbar;
 - (NoteObject*)selectedNoteObject;
 
 - (void)restoreListStateUsingPreferences;
 
+- (void)_finishSyncWait;
 - (IBAction)syncWaitQuit:(id)sender;
 
 - (void)setTableAllowsMultipleSelection;
@@ -103,10 +114,6 @@ void outletObjectAwoke(id sender);
 - (IBAction)bringFocusToControlField:(id)sender;
 - (NSWindow*)window;
 
-- (NSWindow *)previewWindow;
-- (IBAction)switchPreviewRenderingMode:(id)sender;
-- (IBAction)togglePreviewWindow:(id)sender;
-- (void)requestPreviewUpdate;
-- (void)updatePreview:(id)context;
-
+-(IBAction)togglePreview:(id)sender;
+-(void)postTextUpdate;
 @end

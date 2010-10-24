@@ -1,3 +1,15 @@
+/*Copyright (c) 2010, Zachary Schneirov. All rights reserved.
+  Redistribution and use in source and binary forms, with or without modification, are permitted 
+  provided that the following conditions are met:
+   - Redistributions of source code must retain the above copyright notice, this list of conditions 
+     and the following disclaimer.
+   - Redistributions in binary form must reproduce the above copyright notice, this list of 
+	 conditions and the following disclaimer in the documentation and/or other materials provided with
+     the distribution.
+   - Neither the name of Notational Velocity nor the names of its contributors may be used to endorse 
+     or promote products derived from this software without specific prior written permission. */
+
+
 #import "AppController.h"
 #import "NoteObject.h"
 #import "GlobalPrefs.h"
@@ -6,6 +18,7 @@
 #import "PrefsWindowController.h"
 #import "NoteAttributeColumn.h"
 #import "NotationSyncServiceManager.h"
+#import "NotationDirectoryManager.h"
 #import "NSString_NV.h"
 #import "NSCollection_utils.h"
 #import "AttributedPlainText.h"
@@ -20,32 +33,35 @@
 #import "RBSplitView/RBSplitView.h"
 #import "BookmarksController.h"
 #import "SyncSessionController.h"
-#import "DeletionManager.h"
 #import "MultiplePageView.h"
+#import "InvocationRecorder.h"
 #import "URLGetter.h"
 #import "LinearDividerShader.h"
-#import "NSString-Markdown.h"
-#import "NSString_MultiMarkdown.h"
+#import "PreviewController.h"
 #import <WebKit/WebArchive.h>
 #include <Carbon/Carbon.h>
 
-@implementation AppController
+#define NSTextViewChangedNotification @"TextView has changed contents"
 
-@synthesize window;
-@synthesize previewWindow;
-@synthesize isPreviewOutdated;
+@implementation AppController
 
 //an instance of this class is designated in the nib as the delegate of the window, nstextfield and two nstextviews
 
 - (id)init {
-    if ((self = [super init])) {
+    if ([super init]) {
 		
 		windowUndoManager = [[NSUndoManager alloc] init];
+
+        previewController = [[PreviewController alloc] init];
+        [[NSNotificationCenter defaultCenter] addObserver:previewController selector:@selector(requestPreviewUpdate:) name:NSTextViewChangedNotification object:self];
         
+		// Setup URL Handling
+		NSAppleEventManager *appleEventManager = [NSAppleEventManager sharedAppleEventManager];
+		[appleEventManager setEventHandler:self andSelector:@selector(handleGetURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];	
+		
 		dividerShader = [[LinearDividerShader alloc] initWithStartColor:[NSColor colorWithCalibratedWhite:0.988 alpha:1.0] 
 															   endColor:[NSColor colorWithCalibratedWhite:0.875 alpha:1.0]];
-
-		isPreviewOutdated = YES; // toggle default first rendering
+		
 		isCreatingANote = isFilteringFromTyping = typedStringIsCached = NO;
 		typedString = @"";
 		
@@ -55,7 +71,7 @@
 
 - (void)awakeFromNib {
 	prefsController = [GlobalPrefs defaultPrefs];
-	
+    
 	NSView *dualSV = [field superview];
 	dualFieldItem = [[NSToolbarItem alloc] initWithItemIdentifier:@"DualField"];
 	//[[dualSV superview] setFrameSize:NSMakeSize([[dualSV superview] frame].size.width, [[dualSV superview] frame].size.height -1)];
@@ -70,6 +86,7 @@
 	[toolbar setDisplayMode:NSToolbarDisplayModeIconOnly];
 //	[toolbar setSizeMode:NSToolbarSizeModeRegular];
 	[toolbar setShowsBaselineSeparator:YES];
+	[toolbar setVisible:![[NSUserDefaults standardUserDefaults] boolForKey:@"ToolbarHidden"]];
 	[toolbar setDelegate:self];
 	[window setToolbar:toolbar];
 	
@@ -163,7 +180,7 @@ void outletObjectAwoke(id sender) {
 			NSLog(@"Could not load %@!", frameworkPath);
 		}
 	}
-
+	
 	[NSApp setServicesProvider:self];
 }
 
@@ -233,10 +250,16 @@ void outletObjectAwoke(id sender) {
 	//import old database(s) here if necessary
 	[AlienNoteImporter importBlorOrHelpFilesIfNecessaryIntoNotation:newNotation];
 	
-	if (notesToOpenOnLaunch) {
-		[notationController addNotes:notesToOpenOnLaunch];
-		[notesToOpenOnLaunch release];
-		notesToOpenOnLaunch = nil;
+	if (pathsToOpenOnLaunch) {
+		[notationController openFiles:pathsToOpenOnLaunch];
+		[pathsToOpenOnLaunch release];
+		pathsToOpenOnLaunch = nil;
+	}
+	
+	if (URLToSearchOnLaunch) {
+		[self searchForString:[[URLToSearchOnLaunch substringFromIndex:5] stringByReplacingPercentEscapes]];
+		[URLToSearchOnLaunch release];
+		URLToSearchOnLaunch = nil;
 	}
 	
 	//tell us..
@@ -249,16 +272,28 @@ void outletObjectAwoke(id sender) {
 	 @selector(setConfirmNoteDeletion:sender:),nil];  //whether "delete note" should have an ellipsis
 	
 	[self performSelector:@selector(runDelayedUIActionsAfterLaunch) withObject:nil afterDelay:0.0];
-		
+			
 	return;
 terminateApp:
 	[NSApp terminate:self];
+}
+
+- (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent {
+	
+	NSString *fullURL = [[[event paramDescriptorForKeyword:keyDirectObject] stringValue] retain];
+	
+	if (notationController) {
+		[self searchForString:[[fullURL substringFromIndex:5] stringByReplacingPercentEscapes]];
+	} else {
+		URLToSearchOnLaunch = fullURL;
+	}
 }
 
 - (void)setNotationController:(NotationController*)newNotation {
 	
     if (newNotation) {
 		if (notationController) {
+			[notationController endDeletionManagerIfNecessary];
 			[notationController stopSyncServices];
 			[[NSNotificationCenter defaultCenter] removeObserver:self name:SyncSessionsChangedVisibleStatusNotification 
 														  object:[notationController syncSessionController]];
@@ -290,7 +325,6 @@ terminateApp:
 		//window's undomanager could be referencing actions from the old notation object
 		[[window undoManager] removeAllActions];
 		[notationController setUndoManager:[window undoManager]];
-		[[DeletionManager sharedManager] setDelegate:notationController];
 		
 		if ([notationController aliasNeedsUpdating]) {
 			[prefsController setAliasDataForDefaultDirectory:[notationController aliasDataForNoteDirectory] sender:self];
@@ -401,11 +435,7 @@ terminateApp:
 	if ([types containsObject:NSFilenamesPboardType]) {
 		NSArray *files = [pasteboard propertyListForType:NSFilenamesPboardType];
 		if ([files isKindOfClass:[NSArray class]]) {
-			NSArray *notes = [[[[AlienNoteImporter alloc] initWithStoragePaths:files] autorelease] importedNotes];
-			if ([notes count] > 0) {
-				[notationController addNotes:notes];
-				return YES;
-			}
+			if ([notationController openFiles:files]) return YES;
 		}
 	}
 	
@@ -417,7 +447,7 @@ terminateApp:
 		//gecko URL!
 	} else if ([types containsObject:[NSString customPasteboardTypeOfCode:0x4D5A0003]]) {
 		//lazilly use syntheticTitle to get first line, even though that's not how our API is documented
-		sourceIdentiferString = [[pasteboard stringForType:[NSString customPasteboardTypeOfCode:0x4D5A0003]] syntheticTitle];
+		sourceIdentiferString = [[pasteboard stringForType:[NSString customPasteboardTypeOfCode:0x4D5A0003]] syntheticTitleAndTrimmedBody:NULL];
 		unichar nullChar = 0x0;
 		sourceIdentiferString = [sourceIdentiferString stringByReplacingOccurrencesOfString:
 								 [NSString stringWithCharacters:&nullChar length:1] withString:@""];
@@ -435,11 +465,11 @@ terminateApp:
 				[[url scheme] caseInsensitiveCompare:@"https"] == NSOrderedSame ||
 				[[url scheme] caseInsensitiveCompare:@"ftp"] == NSOrderedSame) {
 				NSString *linkTitleType = [NSString customPasteboardTypeOfCode:0x75726C6E];
-				NSString *linkTitle = [types containsObject:linkTitleType] ? [[pasteboard stringForType:linkTitleType] syntheticTitle] : nil;
+				NSString *linkTitle = [types containsObject:linkTitleType] ? [[pasteboard stringForType:linkTitleType] syntheticTitleAndTrimmedBody:NULL] : nil;
 				if (!linkTitle) {
 					//try urld instead of urln
 					linkTitleType = [NSString customPasteboardTypeOfCode:0x75726C64];
-					linkTitle = [types containsObject:linkTitleType] ? [[pasteboard stringForType:linkTitleType] syntheticTitle] : nil;
+					linkTitle = [types containsObject:linkTitleType] ? [[pasteboard stringForType:linkTitleType] syntheticTitleAndTrimmedBody:NULL] : nil;
 				}
 				[[[[AlienNoteImporter alloc] init] autorelease] importURLInBackground:url linkTitle:linkTitle receptionDelegate:self];
 				return YES;
@@ -464,6 +494,13 @@ terminateApp:
 		if ((data = [pasteboard dataForType:NSRTFDPboardType]))
 			newString = [[NSMutableAttributedString alloc] initWithRTFD:data documentAttributes:NULL];
 		hasRTFData = YES;
+	} else if ([types containsObject:WebArchivePboardType] && !shallUsePlainTextFallback) {
+		if ((data = [pasteboard dataForType:WebArchivePboardType])) {
+			//set a timeout because -[NSHTMLReader _loadUsingWebKit] can sometimes hang
+			newString = [[NSMutableAttributedString alloc] initWithData:data options:[NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:10.0] forKey:NSTimeoutDocumentOption] 
+													 documentAttributes:NULL error:NULL];
+		}
+		hasRTFData = YES;
 	} else if (([types containsObject:NSStringPboardType])) {
 		
 		NSString *pboardString = [pasteboard stringForType:NSStringPboardType];
@@ -477,7 +514,7 @@ terminateApp:
 		if (hasRTFData && ![prefsController pastePreservesStyle]) //fallback scenario
 			newString = [[[NSMutableAttributedString alloc] initWithString:[newString string]] autorelease];
 		
-		NSString *noteTitle = [[newString string] syntheticTitle];
+		NSString *noteTitle = [newString trimLeadingSyntheticTitle];
 		if ([sourceIdentiferString length] > 0) {
 			//add the URL or wherever it was that this piece of text came from
 			[newString prefixWithSourceString:sourceIdentiferString];
@@ -500,6 +537,12 @@ terminateApp:
 	
 	if (returnCode == NSAlertDefaultReturn) {
 		//delete! nil-msgsnd-checking
+		
+		//ensure that there are no pending edits in the tableview, 
+		//lest editing end with the same field editor and a different selected note
+		//resulting in the renaming of notes in adjacent rows
+		[notesTableView abortEditing];
+		
 		if ([retainedDeleteObj isKindOfClass:[NSArray class]]) {
 			[notationController removeNotes:retainedDeleteObj];
 		} else if ([retainedDeleteObj isKindOfClass:[NoteObject class]]) {
@@ -511,9 +554,7 @@ terminateApp:
 
 
 - (IBAction)deleteNote:(id)sender {
-	
-	[notesTableView abortEditing];
-	
+		
 	NSIndexSet *indexes = [notesTableView selectedRowIndexes];
 	if ([indexes count] > 0) {
 		id deleteObj = [indexes count] > 1 ? (id)([notationController notesAtIndexes:indexes]) : (id)([notationController noteObjectAtFilteredIndex:[indexes firstIndex]]);
@@ -526,7 +567,7 @@ terminateApp:
 			[NSString stringWithFormat:warningMultipleFormatString, [indexes count]];
 			NSBeginAlertSheet(warnString, NSLocalizedString(@"Delete", @"name of delete button"), NSLocalizedString(@"Cancel", @"name of cancel button"), 
 							  nil, window, self, @selector(deleteSheetDidEnd:returnCode:contextInfo:), NULL, (void*)deleteObj, 
-							  NSLocalizedString(@"You can undo this action later.", @"informational delete-this-note? text"));
+							  NSLocalizedString(@"Press Command-Z to undo this action later.", @"informational delete-this-note? text"));
 		} else {
 			//just delete the notes outright			
 			[notationController performSelector:[indexes count] > 1 ? @selector(removeNotes:) : @selector(removeNote:) withObject:deleteObj];
@@ -672,17 +713,12 @@ terminateApp:
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames {
 	
-	//should check filenames here to see whether notationcontroller already owns these
-	NSArray *notes = [[[[AlienNoteImporter alloc] initWithStoragePaths:filenames] autorelease] importedNotes];
+	if (notationController)
+		[notationController openFiles:filenames];
+	else
+		pathsToOpenOnLaunch = [filenames mutableCopyWithZone:nil];
 	
-	if (notes) {
-		if (notationController)
-			[notationController addNotes:notes];
-		else
-			notesToOpenOnLaunch = [notes mutableCopyWithZone:nil];
-	}
-	
-	[NSApp replyToOpenOrPrint:notes ? NSApplicationDelegateReplySuccess : NSApplicationDelegateReplyFailure];
+	[NSApp replyToOpenOrPrint:[filenames count] ? NSApplicationDelegateReplySuccess : NSApplicationDelegateReplyFailure];
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)aNotification {
@@ -716,6 +752,11 @@ terminateApp:
 	return dockMenu;
 }
 
+- (void)cancel:(id)sender {
+	//fallback for when other views are hidden/removed during toolbar collapse
+	[self cancelOperation:sender];
+}
+
 - (void)cancelOperation:(id)sender {
 	//simulate a search for nothing
 	
@@ -725,6 +766,8 @@ terminateApp:
 	[notationController filterNotesFromString:@""];
 	
 	[notesTableView deselectAll:sender];
+	[self _expandToolbar];
+	
 	[field selectText:sender];
 	[[field cell] setShowsClearButton:NO];
 }
@@ -1008,15 +1051,19 @@ terminateApp:
 				//while the user is typing and auto-completion is disabled, so should be OK
 
 				if (!isFilteringFromTyping) {
-					if (fieldEditor) {
-						//the field editor has focus--select text, too
-						[fieldEditor setString:titleOfNote(currentNote)];
-						unsigned int strLen = [titleOfNote(currentNote) length];
-						if (strLen != [fieldEditor selectedRange].length)
-							[fieldEditor setSelectedRange:NSMakeRange(0, strLen)];
+					if ([toolbar isVisible]) {
+						if (fieldEditor) {
+							//the field editor has focus--select text, too
+							[fieldEditor setString:titleOfNote(currentNote)];
+							unsigned int strLen = [titleOfNote(currentNote) length];
+							if (strLen != [fieldEditor selectedRange].length)
+								[fieldEditor setSelectedRange:NSMakeRange(0, strLen)];
+						} else {
+							//this could be faster
+							[field setStringValue:titleOfNote(currentNote)];
+						}
 					} else {
-						//this could be faster
-						[field setStringValue:titleOfNote(currentNote)];
+						[window setTitle:titleOfNote(currentNote)];
 					}
 				}
 			}
@@ -1044,6 +1091,7 @@ terminateApp:
 			}
 			[textView setString:@""];
 		}
+		[self _expandToolbar];
 		
 		if (!currentNote) {
 			if (selectedRow == -1 && (!fieldEditor || [window firstResponder] != fieldEditor)) {
@@ -1107,8 +1155,8 @@ terminateApp:
 		
 		//restore string
 		[[textView textStorage] setAttributedString:[note contentString]];
-		[self requestPreviewUpdate];
-				
+		[self postTextUpdate];
+        
 		//[textView setAutomaticallySelectedRange:NSMakeRange(0,0)];
 		
 		//highlight terms--delay this, too
@@ -1138,7 +1186,7 @@ terminateApp:
 	
 	if (textObject == textView) {
 		[currentNote setContentString:[textView textStorage]];
-		[self requestPreviewUpdate]; // TODO: above call triggers text update?
+        [self postTextUpdate];
 	}
 }
 
@@ -1189,11 +1237,6 @@ terminateApp:
     return nil;
 }
 
-- (void)noteEndedEditing:(NoteObject*)aNote {
-	//rebuild cstring cache
-	//flush queued sync-service-pushes
-}
-
 - (NoteObject*)createNoteIfNecessary {
     
     if (!currentNote) {
@@ -1216,7 +1259,7 @@ terminateApp:
 	//to be invoked after loading a notationcontroller
 	
 	NSString *searchString = [prefsController lastSearchString];
-	if (searchString)
+	if ([searchString length])
 		[self searchForString:searchString];
 	else
 		[notationController refilterNotes];
@@ -1279,6 +1322,8 @@ terminateApp:
 	
 	if (string) {
 		
+		//problem: this won't work when the toolbar (and consequently the searchfield) is hidden;
+		//and neither will the controlTextDidChange implementation
 		[window makeFirstResponder:field];
 		NSTextView* fieldEditor = (NSTextView*)[field currentEditor];
 		NSRange fullRange = NSMakeRange(0, [[fieldEditor string] length]);
@@ -1314,7 +1359,55 @@ terminateApp:
 
 //mail.app-like resizing behavior wrt item selections
 - (void)willAdjustSubviews:(RBSplitView*)sender {
-	[notesTableView makeFirstPreviouslyVisibleRowVisibleIfNecessary];	
+	[notesTableView makeFirstPreviouslyVisibleRowVisibleIfNecessary];
+}
+
+- (void)_expandToolbar {
+	if (![toolbar isVisible]) {
+		[window setTitle:@"Notation"];
+		if (currentNote)
+			[field setStringValue:titleOfNote(currentNote)];
+		[window toggleToolbarShown:nil];
+		if (![splitView isDragging])
+			[[splitView subviewAtPosition:0] setDimension:100.0];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"ToolbarHidden"];
+	}
+}
+
+- (void)_collapseToolbar {
+	if ([toolbar isVisible]) {
+		if (currentNote)
+			[window setTitle:titleOfNote(currentNote)];
+		[window toggleToolbarShown:nil];
+		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ToolbarHidden"];
+	}
+}
+
+- (BOOL)splitView:(RBSplitView*)sender shouldResizeWindowForDivider:(NSUInteger)divider 
+	  betweenView:(RBSplitSubview*)leading andView:(RBSplitSubview*)trailing willGrow:(BOOL)grow {
+
+	if ([sender isDragging]) {
+		BOOL toolbarVisible = [toolbar isVisible];
+		NSPoint mouse = [sender convertPoint:[[window currentEvent] locationInWindow] fromView:nil];
+		
+		if ((toolbarVisible && !grow && mouse.y < -28.0 && ![leading canShrink]) || 
+			(!toolbarVisible && grow)) {
+			BOOL wasVisible = toolbarVisible;
+			if (toolbarVisible) {
+				[self _collapseToolbar];
+			} else {
+				[self _expandToolbar];
+			}
+			
+			if (!wasVisible && [window firstResponder] == window) {
+				//if dualfield had first responder previously, it might need to be restored 
+				//if it had been removed from the view hierarchy due to hiding the toolbar
+				[field selectText:sender];
+			}
+		}
+	}
+
+	return NO;
 }
 
 - (void)tableViewColumnDidResize:(NSNotification *)aNotification {
@@ -1390,7 +1483,11 @@ terminateApp:
 
 - (void)titleUpdatedForNote:(NoteObject*)aNoteObject {
     if (aNoteObject == currentNote) {
-		[field setStringValue:titleOfNote(currentNote)];
+		if ([toolbar isVisible]) {
+			[field setStringValue:titleOfNote(currentNote)];
+		} else {
+			[window setTitle:titleOfNote(currentNote)];
+		}
     }
 	[[prefsController bookmarksController] updateBookmarksUI];
 }
@@ -1399,7 +1496,7 @@ terminateApp:
 	if (aNoteObject == currentNote) {
 		
 		[[textView textStorage] setAttributedString:[aNoteObject contentString]];
-		[self requestPreviewUpdate];
+        [self postTextUpdate];
 	}
 }
 
@@ -1433,14 +1530,22 @@ terminateApp:
 }
 
 - (void)windowWillClose:(NSNotification *)aNotification {
-    if ([prefsController quitWhenClosingWindow]
-        && [aNotification object] == self.window )
+    if ([prefsController quitWhenClosingWindow] && [[aNotification object] isEqual:self])
 		[NSApp terminate:nil];
 }
 
+- (void)_finishSyncWait {
+	//always post to next runloop to ensure that a sleep-delay response invocation, if one is also queued, runs before this one
+	//if the app quits before the sleep-delay response posts, then obviously sleep will be delayed by quite a bit
+	[self performSelector:@selector(syncWaitQuit:) withObject:nil afterDelay:0];
+}
+
 - (IBAction)syncWaitQuit:(id)sender {
-	//need this variable until unsyncedNotes are cleaned by a full sync
+	//need this variable to allow overriding the wait
 	waitedForUncommittedChanges = YES;
+	NSString *errMsg = [[notationController syncSessionController] changeCommittingErrorMessage];
+	if ([errMsg length]) NSRunAlertPanel(NSLocalizedString(@"Changes could not be uploaded.", nil), errMsg, @"Quit", nil, nil);
+	
 	[NSApp terminate:nil];
 }
 
@@ -1449,8 +1554,12 @@ terminateApp:
 	//otherwise, if there are unsynced notes to send, then push them right now and wait until session is no longer running	
 	//use waitForUncommitedChangesWithTarget:selector: and provide a callback to send NSTerminateNow
 	
+	InvocationRecorder *invRecorder = [InvocationRecorder invocationRecorder];
+	[[invRecorder prepareWithInvocationTarget:self] _finishSyncWait];
+	
 	if (!waitedForUncommittedChanges &&
-		[[notationController syncSessionController] waitForUncommitedChangesWithTarget:self selector:@selector(syncWaitQuit:)]) {
+		[[notationController syncSessionController] waitForUncommitedChangesWithInvocation:[invRecorder invocation]]) {
+		
 		[[NSApp windows] makeObjectsPerformSelector:@selector(orderOut:) withObject:nil];
 		[syncWaitPanel center];
 		[syncWaitPanel makeKeyAndOrderFront:nil];
@@ -1490,8 +1599,10 @@ terminateApp:
 }
 
 - (void)dealloc {
+    [previewController release];
 	[windowUndoManager release];
 	[dividerShader release];
+    [self postTextUpdate];
 	
 	[super dealloc];
 }
@@ -1510,6 +1621,7 @@ terminateApp:
 }
 
 - (IBAction)bringFocusToControlField:(id)sender {
+	[self _expandToolbar];
 	
 	[field selectText:sender];
 	
@@ -1519,52 +1631,17 @@ terminateApp:
 	[self setEmptyViewState:currentNote == nil];
 }
 
-- (IBAction)switchPreviewRenderingMode:(id)sender
+- (NSWindow*)window {
+	return window;
+}
+
+-(IBAction)togglePreview:(id)sender
 {
-    // TODO implement
-} // switchPreviewRenderingMode
+    [previewController togglePreview:self];
+}
 
-- (IBAction)togglePreviewWindow:(id)sender
+-(void)postTextUpdate
 {
-    if ([previewWindow isVisible]) {        
-        [previewWindow orderOut:self];
-    } else {
-        if (self.isPreviewOutdated) {
-            [self updatePreview:nil];
-        }
-        
-        [previewWindow orderFront:self];
-    }
-
-} // togglePreviewWindow
-
-- (void)requestPreviewUpdate
-{
-    // abort when window is not shown to avoid lags
-    if (![previewWindow isVisible]) {
-        self.isPreviewOutdated = YES;
-        return;
-    }
-    
-    [NSObject cancelPreviousPerformRequestsWithTarget:self 
-                                             selector:@selector(updatePreview:) 
-                                               object:nil];
-	
-	[self performSelector:@selector(updatePreview:) 
-               withObject:nil 
-               afterDelay:0.5];
-} // updatePreview
-
-- (void)updatePreview:(id)context
-{
-    NSString* input = [textView string];
-	NSString* processedString = [NSString stringWithProcessedMultiMarkdown:input];
-	
-	[[previewWebView mainFrame] loadHTMLString:processedString 
-                                       baseURL:nil];
-    
-    self.isPreviewOutdated = NO;
-} // preview
-
-
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSTextViewChangedNotification object:self];
+}
 @end
