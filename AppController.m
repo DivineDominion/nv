@@ -1677,7 +1677,7 @@ terminateApp:
     currentPreviewMode = [previewItem tag];
     
     // update user defaults
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:currentPreviewMode ]
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:currentPreviewMode]
                                               forKey:kDefaultMarkupPreviewMode];
     
     [self postTextUpdate];

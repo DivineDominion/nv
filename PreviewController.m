@@ -12,15 +12,30 @@
 #import "NSString_Markdown.h"
 #import "NSString_Textile.h"
 
+#define kDefaultMarkupPreviewVisible @"markupPreviewVisible"
+
 @implementation PreviewController
 
 @synthesize preview;
 @synthesize isPreviewOutdated;
 
++(void)initialize
+{
+    NSDictionary *appDefaults = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO]
+                                                            forKey:kDefaultMarkupPreviewVisible];
+    
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+}
+
 -(id)init
 {
     if ((self = [super initWithWindowNibName:@"MarkupPreview" owner:self])) {
         self.isPreviewOutdated = YES;
+        
+        BOOL showPreviewWindow = [[NSUserDefaults standardUserDefaults] boolForKey:kDefaultMarkupPreviewVisible];
+        if (showPreviewWindow) {
+            [[self window] orderFront:self];
+        }
     }
     return self;
 }
@@ -52,6 +67,10 @@
         
         [wnd orderFront:self];
     }
+    
+    // save visibility to defaults
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:[wnd isVisible]]
+                                              forKey:kDefaultMarkupPreviewVisible];
 }
 
 -(void)preview:(id)object
