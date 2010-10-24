@@ -44,14 +44,12 @@
     }
     
     return bundlePath;
-}
+} // mmdDirectory
 
 +(NSString*)stringWithProcessedMultiMarkdown:(NSString*)inputString
 {
-    // TODO: first try ~/Lib/... and fall back to internal MMD
-    //NSString* mdScriptPath = @"~/Library/Application Support/MultiMarkdown/bin/mmd2ZettelXHTML.pl";
     NSString* mdScriptPath = [[self class] mmdDirectory];
-    NSLog(mdScriptPath);
+    
 	NSTask* task = [[[NSTask alloc] init] autorelease];
 	NSMutableArray* args = [NSMutableArray array];
 	
@@ -78,6 +76,6 @@
 	[task waitUntilExit];
 	
 	return outputString;
-}
+} // stringWithProcessedMultiMarkdown:
 
-@end
+@end // NSString (MultiMarkdown)
