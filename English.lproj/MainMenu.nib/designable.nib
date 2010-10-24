@@ -21,8 +21,8 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
+			<integer value="29"/>
 			<integer value="1066"/>
-			<integer value="1115"/>
 			<integer value="21"/>
 			<integer value="1079"/>
 		</object>
@@ -1144,14 +1144,14 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					</object>
 					<object class="NSMenuItem" id="184300755">
 						<reference key="NSMenu" ref="154760987"/>
-						<string key="NSTitle">Menu</string>
+						<string key="NSTitle">Preview</string>
 						<string key="NSKeyEquiv"/>
 						<int key="NSMnemonicLoc">2147483647</int>
 						<reference key="NSOnImage" ref="45897863"/>
 						<reference key="NSMixedImage" ref="520021446"/>
 						<string key="NSAction">submenuAction:</string>
 						<object class="NSMenu" key="NSSubmenu" id="260390050">
-							<string key="NSTitle">Menu</string>
+							<string key="NSTitle">Preview</string>
 							<object class="NSMutableArray" key="NSMenuItems">
 								<bool key="EncodedWithXMLCoder">YES</bool>
 								<object class="NSMenuItem" id="865635529">
@@ -3694,7 +3694,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{734, 756}, {192, 93}}</string>
+					<string>{{729, 409}, {192, 93}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3781,7 +3781,7 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{329, 849}, {659, 20}}</string>
+					<string>{{324, 502}, {673, 20}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -4240,27 +4240,22 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">FirstResponder</string>
+					<string key="superclassName">NSObject</string>
 					<object class="NSMutableDictionary" key="actions">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>bold:</string>
-							<string>capitalizeWord:</string>
 							<string>defaultStyle:</string>
 							<string>deleteToBeginningOfLine:</string>
 							<string>deleteWordBackward:</string>
 							<string>italic:</string>
-							<string>lowercaseWord:</string>
 							<string>shiftLeftAction:</string>
 							<string>shiftRightAction:</string>
 							<string>underlineNV:</string>
-							<string>uppercaseWord:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -4276,25 +4271,18 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>bold:</string>
-							<string>capitalizeWord:</string>
 							<string>defaultStyle:</string>
 							<string>deleteToBeginningOfLine:</string>
 							<string>deleteWordBackward:</string>
 							<string>italic:</string>
-							<string>lowercaseWord:</string>
 							<string>shiftLeftAction:</string>
 							<string>shiftRightAction:</string>
 							<string>underlineNV:</string>
-							<string>uppercaseWord:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
 								<string key="name">bold:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">capitalizeWord:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -4314,10 +4302,6 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">lowercaseWord:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
 								<string key="name">shiftLeftAction:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -4327,10 +4311,6 @@ cHlyaWdodCBBcHBsZSBDb21wdXRlciwgSW5jLiwgMjAwNQAAAAA</bytes>
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">underlineNV:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">uppercaseWord:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
