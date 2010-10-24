@@ -10,15 +10,48 @@
 
 @implementation NSString (MultiMarkdown)
 
-+ (NSString*)stringWithProcessedMultiMarkdown:(NSString*)inputString
+/*!
+ * Locating a MultiMarkdown parsing script.  The options are as follows:
+ *   1.  ~/Library/Application Support/MultiMarkdown/bin/mmd2ZettelXHTML.pl
+ *   2.  ~/Library/Application Support/MultiMarkdown/bin/mmd2XHTML.pl
+ *   3.  <Application>/MultiMarkdown/bin/mmd2ZettelXHTML.pl
+ *
+ * The third option should be a safe fallback since the appropriate MMD bundle
+ * is included and shipped with this application.
+ */
++(NSString*)mmdDirectory {
+    // fallback path in this program's directiory
+    NSString *bundlePath = [[[[[NSBundle mainBundle] resourcePath] 
+                              stringByAppendingPathComponent:@"MultiMarkdown"] 
+                             stringByAppendingPathComponent:@"bin"] 
+                            stringByAppendingPathComponent:@"mmd2ZettelXHTML.pl"];
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    
+    if ([paths count] > 0) {
+        NSString *path = [[[paths objectAtIndex:0] 
+                           stringByAppendingPathComponent:@"MultiMarkdown"] 
+                          stringByAppendingPathComponent:@"bin"];
+        NSFileManager *mgr = [NSFileManager defaultManager];
+        NSString *mmdZettel = [path stringByAppendingPathComponent:@"mmd2ZettelXHTML.pl"];
+        NSString *mmdDefault = [path stringByAppendingPathComponent:@"mmd2XHTML.pl"];
+        
+        if ([mgr fileExistsAtPath:mmdZettel]) {
+            return mmdZettel;
+        } else if ([mgr fileExistsAtPath:mmdDefault]) {
+            return mmdDefault;
+        }
+    }
+    
+    return bundlePath;
+}
+
++(NSString*)stringWithProcessedMultiMarkdown:(NSString*)inputString
 {
     // TODO: first try ~/Lib/... and fall back to internal MMD
     //NSString* mdScriptPath = @"~/Library/Application Support/MultiMarkdown/bin/mmd2ZettelXHTML.pl";
-    NSString* mdScriptPath = [[[[[NSBundle mainBundle] resourcePath] 
-                                stringByAppendingPathComponent:@"MultiMarkdown"] 
-                               stringByAppendingPathComponent:@"bin"] 
-                              stringByAppendingPathComponent:@"mmd2ZettelXHTML.pl"];
-
+    NSString* mdScriptPath = [[self class] mmdDirectory];
+    NSLog(mdScriptPath);
 	NSTask* task = [[[NSTask alloc] init] autorelease];
 	NSMutableArray* args = [NSMutableArray array];
 	
