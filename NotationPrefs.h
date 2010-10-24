@@ -24,7 +24,7 @@ including encryption, file formats, synchronization, passwords management, and o
 
 #define EPOC_ITERATION 3
 
-enum { SingleDatabaseFormat = 0, PlainTextFormat, MarkupTextFormat, RTFTextFormat, HTMLFormat, WordDocFormat, WordXMLFormat };
+enum { SingleDatabaseFormat = 0, PlainTextFormat, RTFTextFormat, HTMLFormat, WordDocFormat, WordXMLFormat, MarkupTextFormat };
 
 extern NSString *SyncPrefsDidChangeNotification;
 
@@ -41,7 +41,7 @@ extern NSString *SyncPrefsDidChangeNotification;
 	int notesStorageFormat;
 	BOOL confirmFileDeletion;
 	
-    NSMutableArray *typeStrings[4], *pathExtensions[4];
+    NSMutableArray *typeStrings[7], *pathExtensions[7];
     OSType *allowedTypes;
 	
 	NSData *masterSalt, *dataSessionSalt, *verifierKey;

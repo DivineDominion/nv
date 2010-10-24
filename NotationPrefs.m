@@ -55,7 +55,7 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
 		allowedTypes = NULL;
 		
 		unsigned int i;
-		for (i=0; i<4; i++) {
+		for (i=0; i<=6; i++) {
 			typeStrings[i] = [[NotationPrefs defaultTypeStringsForFormat:i] retain];
 			pathExtensions[i] = [[NotationPrefs defaultPathExtensionsForFormat:i] retain];
 		}
@@ -193,7 +193,6 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
 	case SingleDatabaseFormat:
 	    return [NSMutableArray arrayWithCapacity:0];
 	case MarkupTextFormat: 
-		// TODO check compatibility
 		// (fall-through intended)
 	case PlainTextFormat: 
 	    return [NSMutableArray arrayWithObjects:[(id)UTCreateStringForOSType(TEXT_TYPE_ID) autorelease], 
@@ -212,13 +211,14 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
 }
 
 + (NSMutableArray*)defaultPathExtensionsForFormat:(int)formatID {
+    NSLog(@"%d",formatID);
     switch (formatID) {
 	case SingleDatabaseFormat:
 	    return [NSMutableArray arrayWithCapacity:0];
 	case PlainTextFormat: 
 	    return [NSMutableArray arrayWithObjects:@"txt", @"text", @"utf8", nil];
 	case MarkupTextFormat:
-		return [NSMutableArray arrayWithObjects:@"md", @"mmd", @"mdown", @"markdown", @"textile", nil];
+		return [NSMutableArray arrayWithObjects:@"md", @"mmd", @"mdown", @"markdown", @"textile", @"text", @"txt", nil];
 	case RTFTextFormat: 
 	    return [NSMutableArray arrayWithObjects:@"rtf", nil];
 	case HTMLFormat:
@@ -826,9 +826,10 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
     switch (format) {
 	case SingleDatabaseFormat:
 	case PlainTextFormat:
-	    
-	    return @"md"; //txt
+            
+	    return @"txt";
 	case MarkupTextFormat:
+            
 		return @"md";
 	case RTFTextFormat:
 	    

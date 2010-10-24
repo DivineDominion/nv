@@ -407,7 +407,9 @@ terminateApp:
 		return (numberSelected == 1);
 	} else if (selector == @selector(fixFileEncoding:)) {
 		
-		return (currentNote != nil && storageFormatOfNote(currentNote) == PlainTextFormat && ![currentNote contentsWere7Bit]);
+		return (currentNote != nil 
+                && (storageFormatOfNote(currentNote) == PlainTextFormat || storageFormatOfNote(currentNote) == MarkupTextFormat) 
+                && ![currentNote contentsWere7Bit]);
 	}
 	
 	return YES;

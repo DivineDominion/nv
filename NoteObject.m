@@ -888,6 +888,7 @@ force_inline id properlyHighlightingTableTitleOfNote(NotesTableView *tv, NoteObj
 			NSAssert(NO, @"Warning! Tried to write data for an individual note in single-db format!");
 			
 			return NO;
+        case MarkupTextFormat:
 		case PlainTextFormat:
 			
 			if (!(formattedData = [[contentString string] dataUsingEncoding:fileEncoding allowLossyConversion:NO])) {
@@ -940,7 +941,7 @@ force_inline id properlyHighlightingTableTitleOfNote(NotesTableView *tv, NoteObj
 			return NO;
 		}
 		//if writing plaintext set the file encoding with setxattr
-		if (PlainTextFormat == formatID) {
+		if (PlainTextFormat == formatID || MarkupTextFormat == formatID) {
 			(void)[self writeCurrentFileEncodingToFSRef:noteFileRefInit(self)];
 		}
 		//always hide the file extension for all types
@@ -1032,7 +1033,7 @@ force_inline id properlyHighlightingTableTitleOfNote(NotesTableView *tv, NoteObj
 	if (NSUTF8StringEncoding != fileEncoding) {
 		[self _setFileEncoding:NSUTF8StringEncoding];
 		
-		if (!contentsWere7Bit && PlainTextFormat == currentFormatID) {
+		if (!contentsWere7Bit && (PlainTextFormat == currentFormatID || MarkupTextFormat == currentFormatID)) {
 			//this note exists on disk as a plaintext file, and its encoding is incompatible with UTF-8
 			
 			if ([delegate currentNoteStorageFormat] == PlainTextFormat) {
@@ -1159,6 +1160,7 @@ force_inline id properlyHighlightingTableTitleOfNote(NotesTableView *tv, NoteObj
 		NSAssert(NO, @"Warning! Tried to update data from a note in single-db format!");
 	    
 	    break;
+    case MarkupTextFormat:
 	case PlainTextFormat:
 		//try to merge/re-match attributes?
 	    if ((stringFromData = [NSMutableString newShortLivedStringFromData:data ofGuessedEncoding:&fileEncoding withPath:NULL orWithFSRef:noteFileRefInit(self)])) {
@@ -1304,6 +1306,7 @@ force_inline id properlyHighlightingTableTitleOfNote(NotesTableView *tv, NoteObj
 	switch (storageFormat) {
 		case SingleDatabaseFormat:
 			NSAssert(NO, @"Warning! Tried to export data in single-db format!?");
+        case MarkupTextFormat:
 		case PlainTextFormat:
 			if (!(formattedData = [[contentString string] dataUsingEncoding:fileEncoding allowLossyConversion:NO])) {
 				[self _setFileEncoding:NSUTF8StringEncoding];
@@ -1358,7 +1361,7 @@ force_inline id properlyHighlightingTableTitleOfNote(NotesTableView *tv, NoteObj
 		NSLog(@"error writing to temporary file: %d", err);
 		return err;
     }
-	if (PlainTextFormat == storageFormat) {
+	if (PlainTextFormat == storageFormat || MarkupTextFormat == storageFormat) {
 		(void)[self writeCurrentFileEncodingToFSRef:&fileRef];
 	}
 	
