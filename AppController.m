@@ -19,6 +19,7 @@
 #import "NoteAttributeColumn.h"
 #import "NotationSyncServiceManager.h"
 #import "NotationDirectoryManager.h"
+#import "NotationFileManager.h"
 #import "NSString_NV.h"
 #import "NSCollection_utils.h"
 #import "AttributedPlainText.h"
@@ -454,7 +455,6 @@ terminateApp:
 	
 	NSArray *types = [pasteboard types];
 	NSMutableAttributedString *newString = nil;
-	NoteObject *note = nil;
 	NSData *data = nil;
 		
 	if ([types containsObject:NSFilenamesPboardType]) {
@@ -539,13 +539,19 @@ terminateApp:
 		if (hasRTFData && ![prefsController pastePreservesStyle]) //fallback scenario
 			newString = [[[NSMutableAttributedString alloc] initWithString:[newString string]] autorelease];
 		
-		NSString *noteTitle = [newString trimLeadingSyntheticTitle];
+		NSUInteger bodyLoc = 0, prefixedSourceLength = 0;
+		NSString *noteTitle = [[newString string] syntheticTitleAndSeparatorWithContext:NULL bodyLoc:&bodyLoc oldTitle:nil];
 		if ([sourceIdentiferString length] > 0) {
 			//add the URL or wherever it was that this piece of text came from
-			[newString prefixWithSourceString:sourceIdentiferString];
+			prefixedSourceLength = [[newString prefixWithSourceString:sourceIdentiferString] length];
 		}
 		[newString santizeForeignStylesForImporting];
-		note = [notationController addNote:newString withTitle:noteTitle];
+
+		NoteObject *note = [[[NoteObject alloc] initWithNoteBody:newString title:noteTitle uniqueFilename:[notationController uniqueFilenameForTitle:noteTitle fromNote:nil]
+														  format:[notationController currentNoteStorageFormat]] autorelease];
+		if (bodyLoc > 0 && [newString length] >= bodyLoc + prefixedSourceLength) [note setSelectedRange:NSMakeRange(prefixedSourceLength, bodyLoc)];
+		[notationController addNewNote:note];
+		
 		return note != nil;
 	}
 	
@@ -1272,9 +1278,16 @@ terminateApp:
 		[textView setFont:[prefsController noteBodyFont]];
 		
 		isCreatingANote = YES;
-		NoteObject *newNote = [notationController addNote:[textView textStorage] withTitle:[field stringValue]];
+		NSString *title = [[field stringValue] length] ? [field stringValue] : NSLocalizedString(@"Untitled Note", @"Title of a nameless note");
+		NSAttributedString *attributedContents = [textView textStorage] ? [textView textStorage] : [[[NSAttributedString alloc] initWithString:@"" attributes:
+																									 [prefsController noteBodyAttributes]] autorelease];		
+		NoteObject *note = [[[NoteObject alloc] initWithNoteBody:attributedContents title:title 
+												 uniqueFilename:[notationController uniqueFilenameForTitle:title fromNote:nil]
+														 format:[notationController currentNoteStorageFormat]] autorelease];
+		[notationController addNewNote:note];
+		
 		isCreatingANote = NO;
-		return newNote;
+		return note;
     }
     
     return currentNote;
