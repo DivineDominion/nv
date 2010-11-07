@@ -160,12 +160,8 @@
 		57F27F7B11973A7F00C63ACF /* Notation.sdef in Resources */ = {isa = PBXBuildFile; fileRef = 57F27F7A11973A7F00C63ACF /* Notation.sdef */; };
 		57F27FB91197407400C63ACF /* SearchCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 57F27FB81197407400C63ACF /* SearchCommand.m */; };
 		608A24D21268DB9F00EEF326 /* NSString_Textile.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A24D11268DB9F00EEF326 /* NSString_Textile.m */; };
-		608A24F11268DCF900EEF326 /* Textile_2.12 in Resources */ = {isa = PBXBuildFile; fileRef = 608A24ED1268DCF900EEF326 /* Textile_2.12 */; };
-		608A24F81268DDC800EEF326 /* Markdown_1.0.1 in Resources */ = {isa = PBXBuildFile; fileRef = 608A24F31268DDC800EEF326 /* Markdown_1.0.1 */; };
 		608A24FB1268DDF200EEF326 /* NSString_Markdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A24FA1268DDF200EEF326 /* NSString_Markdown.m */; };
-		608A25651268DEAB00EEF326 /* MultiMarkdown in Resources */ = {isa = PBXBuildFile; fileRef = 608A25061268DEAB00EEF326 /* MultiMarkdown */; };
 		608A25661268DEAB00EEF326 /* NSString_MultiMarkdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A25641268DEAB00EEF326 /* NSString_MultiMarkdown.m */; };
-		608A25791268DF9700EEF326 /* MarkupPreview.xib in Resources */ = {isa = PBXBuildFile; fileRef = 608A25781268DF9700EEF326 /* MarkupPreview.xib */; };
 		608A25AF1268ECFA00EEF326 /* PreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A25AE1268ECFA00EEF326 /* PreviewController.m */; };
 		608A25B61268EE5E00EEF326 /* AppController_Preview.m in Sources */ = {isa = PBXBuildFile; fileRef = 608A25B51268EE5E00EEF326 /* AppController_Preview.m */; };
 		608A267A1268FE4400EEF326 /* BWToolkitFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 608A26791268FE4400EEF326 /* BWToolkitFramework.framework */; };
