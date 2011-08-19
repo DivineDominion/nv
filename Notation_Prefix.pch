@@ -1,17 +1,25 @@
 //
 // Prefix header for all source files of the 'Notation' target in the 'Notation' project
 //
+//NSLog(@"lion:%f", NSFoundationVersionNumber);//632.100000
 
+#include <Availability.h>
 #include <AvailabilityMacros.h>
 #ifndef MAC_OS_X_VERSION_10_6
 #define MAC_OS_X_VERSION_10_6 1060
 #endif
 
-#if __OBJC__
-#import <Cocoa/Cocoa.h>
-#import <WebKit/WebKit.h>
+#ifndef MAC_OS_X_VERSION_10_7
+#define MAC_OS_X_VERSION_10_7 1070
 #endif
 
+#if __OBJC__
+#import <Cocoa/Cocoa.h>
+#endif
+
+#ifndef NSFoundationVersionNumber10_7
+#define NSFoundationVersionNumber10_7 830.00
+#endif
 #ifndef NSFoundationVersionNumber10_6
 #define NSFoundationVersionNumber10_6 751.00
 #endif
@@ -37,6 +45,11 @@ typedef unsigned int NSUInteger;
 
 #define NSINTEGER_DEFINED 1
 #endif
+#define DebugPath(__p) (__p = ((!(__p)) ? __FILE__ : (__p)))
+#define _COMPILE_ASSERT_SYMBOL_INNER(line, msg) __COMPILE_ASSERT_ ## line ## __ ## msg
+#define _COMPILE_ASSERT_SYMBOL(line, msg) _COMPILE_ASSERT_SYMBOL_INNER(line, msg)
+#define COMPILE_ASSERT(test, msg) \
+typedef char _COMPILE_ASSERT_SYMBOL(__LINE__, msg) [ ((test) ? 1 : -1) ]
 
 #define GCC_VERSION (__GNUC__ * 10000 \
 + __GNUC_MINOR__ * 100 \
@@ -69,7 +82,12 @@ typedef unsigned int NSUInteger;
 #define VERIFY_SALT "Salt for verifying master key in a single iteration"
 #define LOG_SESSION_SALT "Salt for encrypting a write-ahead-log session"
 
+
 #define IsLeopardOrLater (floor(NSFoundationVersionNumber) >= NSFoundationVersionNumber10_5)
 #define IsSnowLeopardOrLater (floor(NSFoundationVersionNumber) >= NSFoundationVersionNumber10_6)
+#define IsLionOrLater (floor(NSFoundationVersionNumber) >= NSFoundationVersionNumber10_7)
+
 
 #define NOTES_MENU_ID 89
+#define VIEW_MENU_ID 99
+

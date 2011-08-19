@@ -11,6 +11,7 @@
 
 
 #import "URLGetter.h"
+#import "GlobalPrefs.h"
 
 @implementation URLGetter
 
@@ -20,7 +21,7 @@
 	}
 	if ([super init]) {
 		maxExpectedByteCount = 0;
-		isIndicating = NO;
+		isImporting = isIndicating = NO;
 		delegate = aDelegate;
 		url = [aUrl retain];
 		userData = [someObj retain];
@@ -60,7 +61,7 @@
 	[window close];
 	[progress stopAnimation:nil];
 	
-	isIndicating = NO;
+	isImporting = isIndicating = NO;
 }
 
 - (void)startProgressIndication:(id)sender {
@@ -70,6 +71,7 @@
 			NSBeep();
 			return;
 		}
+		[progress setUsesThreadedAnimation:YES];
 	}
 	
 	[progress setIndeterminate:YES];
@@ -87,11 +89,13 @@
 
 - (void)updateProgress {
 	if (isIndicating) {
-		[progress setIndeterminate:!maxExpectedByteCount];
+		[progress setIndeterminate:!maxExpectedByteCount || isImporting];
 		[progress setMaxValue:(double)maxExpectedByteCount];
 		
 		[progress setDoubleValue:(double)totalReceivedByteCount];
-		if (maxExpectedByteCount > 0) {
+		if (isImporting) {
+			[progressStatus setStringValue:NSLocalizedString(@"Importing content...", @"Status message after downloading a URL")];
+		} else if (maxExpectedByteCount > 0) {
 			[progressStatus setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%.0lf KB of %.0lf KB", nil), 
 				(double)totalReceivedByteCount / 1024.0, (double)maxExpectedByteCount / 1024.0]];
 		} else {
@@ -147,6 +151,8 @@
 }
 
 - (void)endDownloadWithPath:(NSString*)path {
+	isImporting = YES;
+	[self updateProgress];
 	
 	[self retain];
 	[delegate URLGetter:self returnedDownloadedFile:path];
@@ -169,7 +175,9 @@
 		tempDirectory = nil;
 	}
 	
-	[self stopProgressIndication];
+   
+    [self stopProgressIndication];
+
 	
 	[self release];
 }

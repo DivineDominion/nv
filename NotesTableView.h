@@ -1,14 +1,19 @@
 /* NotesTableView */
 /*Copyright (c) 2010, Zachary Schneirov. All rights reserved.
-  Redistribution and use in source and binary forms, with or without modification, are permitted 
-  provided that the following conditions are met:
-   - Redistributions of source code must retain the above copyright notice, this list of conditions 
-     and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright notice, this list of 
-	 conditions and the following disclaimer in the documentation and/or other materials provided with
-     the distribution.
-   - Neither the name of Notational Velocity nor the names of its contributors may be used to endorse 
-     or promote products derived from this software without specific prior written permission. */
+    This file is part of Notational Velocity.
+
+    Notational Velocity is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Notational Velocity is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Notational Velocity.  If not, see <http://www.gnu.org/licenses/>. */
 
 
 #import <Cocoa/Cocoa.h>
@@ -25,25 +30,35 @@ typedef struct _ViewLocationContext {
 
 
 @interface NotesTableView : NSTableView {
+	NSTimer *modifierTimer;
 	IBOutlet NSTextField *controlField;
 	NSMutableArray *allColumns;
+	NSMutableDictionary *allColsDict;
 	
 	NSInteger firstRowIndexBeforeSplitResize;
 	
 	BOOL viewMenusValid;
 	BOOL hadHighlightInForeground, hadHighlightInBackground;
-	BOOL shouldUseSecondaryHighlightColor;
-		
+	BOOL shouldUseSecondaryHighlightColor, isActiveStyle;
+	BOOL lastEventActivatedTagEdit, wasDeleting, isAutocompleting;
+	
+	id labelsListSource;
+	
 	GlobalPrefs *globalPrefs;
 	NSMenuItem *dummyItem;
 	HeaderViewWithMenu *headerView;
 	NSView *cornerView;
+	NSTextFieldCell *cachedCell;
 	
 	NSDictionary *loadStatusAttributes;
 	float loadStatusStringWidth;
 	NSString *loadStatusString;
+	
+	float tableFontHeight;
 
 	int affinity;	
+
+	NSUserDefaults *userDefaults;
 }
 
 - (void)noteFirstVisibleRow;
@@ -54,19 +69,23 @@ typedef struct _ViewLocationContext {
 - (double)distanceFromRow:(int)aRow forVisibleArea:(NSRect)visibleRect;
 - (void)scrollRowToVisible:(NSInteger)rowIndex withVerticalOffset:(float)offset;
 - (void)selectRowAndScroll:(NSInteger)row;
-- (BOOL)objectIsSelected:(id)obj;
 
+- (float)tableFontHeight;
+
+- (BOOL)isActiveStyle;
 - (void)setShouldUseSecondaryHighlightColor:(BOOL)value;
-- (void)_setTitleDereferencorState:(BOOL)activeStyle;
+- (void)_setActiveStyleState:(BOOL)activeStyle;
 - (void)updateTitleDereferencorState;
 
 - (void)reloadDataIfNotEditing;
 
 - (void)restoreColumns;
-
+- (void)_configureAttributesForCurrentLayout;
 - (void)updateHeaderViewForColumns;
+- (BOOL)eventIsTagEdit:(NSEvent*)event forColumn:(NSInteger)columnIndex row:(NSInteger)rowIndex;
+- (BOOL)lastEventActivatedTagEdit;
 - (void)editRowAtColumnWithIdentifier:(id)identifier;
-- (void)addPermanentTableColumn:(NSTableColumn*)column;
+- (BOOL)addPermanentTableColumn:(NSTableColumn*)column;
 - (IBAction)actionHideShowColumn:(id)sender;
 - (IBAction)toggleNoteBodyPreviews:(id)sender;
 - (void)setStatusForSortedColumn:(id)item;
@@ -77,6 +96,10 @@ typedef struct _ViewLocationContext {
 - (NoteAttributeColumn*)noteAttributeColumnForIdentifier:(NSString*)identifier;
 
 - (void)incrementNoteSelection:(id)sender;
+- (void)_incrementNoteSelectionByTag:(NSInteger)tag;
+
+- (id)labelsListSource;
+- (void)setLabelsListSource:(id)labelsSource;
 
 @end
 
@@ -87,3 +110,4 @@ typedef struct _ViewLocationContext {
 //10.3 only
 - (void)_sizeToFitIfNecessary;
 @end
+

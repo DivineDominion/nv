@@ -5,24 +5,31 @@
 //  Created by Zachary Schneirov on 12/19/05.
 
 /*Copyright (c) 2010, Zachary Schneirov. All rights reserved.
-  Redistribution and use in source and binary forms, with or without modification, are permitted 
-  provided that the following conditions are met:
-   - Redistributions of source code must retain the above copyright notice, this list of conditions 
-     and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright notice, this list of 
-	 conditions and the following disclaimer in the documentation and/or other materials provided with
-     the distribution.
-   - Neither the name of Notational Velocity nor the names of its contributors may be used to endorse 
-     or promote products derived from this software without specific prior written permission. */
+    This file is part of Notational Velocity.
+
+    Notational Velocity is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Notational Velocity is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Notational Velocity.  If not, see <http://www.gnu.org/licenses/>. */
 
 
 #import <Cocoa/Cocoa.h>
 #import "NotationController.h"
+#import "BufferUtils.h"
 #import "SynchronizedNoteProtocol.h"
 
 @class LabelObject;
 @class WALStorageController;
 @class NotesTableView;
+@class ExternalEditor;
 
 typedef struct _NoteFilterContext {
 	char* needle;
@@ -33,13 +40,15 @@ typedef struct _NoteFilterContext {
 	NSAttributedString *tableTitleString;
 	NSString *titleString, *labelString;
 	NSMutableAttributedString *contentString;
-    
+	
 	//caching/searching purposes only -- created at runtime
 	char *cTitle, *cContents, *cLabels, *cTitleFoundPtr, *cContentsFoundPtr, *cLabelsFoundPtr;
 	NSMutableSet *labelSet;
 	BOOL contentsWere7Bit, contentCacheNeedsUpdate;
+	//if this note's title is "Chicken Shack menu listing", its prefix parent might have the title "Chicken Shack"
+	NSMutableArray *prefixParentNotes;
 	
-	NSString *wordCountString;
+//	NSString *wordCountString;
 	NSString *dateModifiedString, *dateCreatedString;
 	
 	id delegate; //the notes controller
@@ -48,10 +57,12 @@ typedef struct _NoteFilterContext {
 	NSString *filename;
 	UInt32 nodeID;
 	UInt32 logicalSize;
-	UTCDateTime fileModifiedDate;
+	UTCDateTime fileModifiedDate, *attrsModifiedDate;
+	PerDiskInfo *perDiskInfoGroups;
+	unsigned int perDiskInfoGroupCount;
 	int currentFormatID;
 	NSStringEncoding fileEncoding;
-	BOOL shouldWriteToFile;
+	BOOL shouldWriteToFile, didUnarchive;
 	
 	//for storing in write-ahead-log
 	unsigned int logSequenceNumber;
@@ -103,34 +114,40 @@ NSInteger compareFileSize(id *a, id *b);
 	UInt32 fileNodeIDOfNote(NoteObject *note);
 	UInt32 fileSizeOfNote(NoteObject *note);
 	UTCDateTime fileModifiedDateOfNote(NoteObject *note);
+	UTCDateTime *attrsModifiedDateOfNote(NoteObject *note);
 	CFAbsoluteTime modifiedDateOfNote(NoteObject *note);
 	CFAbsoluteTime createdDateOfNote(NoteObject *note);
 
 	NSStringEncoding fileEncodingOfNote(NoteObject *note);
-
+	
 	NSString* titleOfNote(NoteObject *note);
 	NSString* labelsOfNote(NoteObject *note);
 
-#define DefColAttrAccessor(__FName, __IVar) force_inline id __FName(NotesTableView *tv, NoteObject *note) { return note->__IVar; }
+	NSMutableArray* prefixParentsOfNote(NoteObject *note);
+
+#define DefColAttrAccessor(__FName, __IVar) force_inline id __FName(NotesTableView *tv, NoteObject *note, NSInteger row) { return note->__IVar; }
 #define DefModelAttrAccessor(__FName, __IVar) force_inline typeof (((NoteObject *)0)->__IVar) __FName(NoteObject *note) { return note->__IVar; }
 
 	//return types are NSString or NSAttributedString, satisifying NSTableDataSource protocol otherwise
-	id titleOfNote2(NotesTableView *tv, NoteObject *note);
-	id tableTitleOfNote(NotesTableView *tv, NoteObject *note);
-	id properlyHighlightingTableTitleOfNote(NotesTableView *tv, NoteObject *note);
-	id labelsOfNote2(NotesTableView *tv, NoteObject *note);
-	id dateCreatedStringOfNote(NotesTableView *tv, NoteObject *note);
-	id dateModifiedStringOfNote(NotesTableView *tv, NoteObject *note);
-	id wordCountOfNote(NotesTableView *tv, NoteObject *note);
+	id titleOfNote2(NotesTableView *tv, NoteObject *note, NSInteger row);
+	id tableTitleOfNote(NotesTableView *tv, NoteObject *note, NSInteger row);
+	id properlyHighlightingTableTitleOfNote(NotesTableView *tv, NoteObject *note, NSInteger row);
+	id unifiedCellSingleLineForNote(NotesTableView *tv, NoteObject *note, NSInteger row);
+	id unifiedCellForNote(NotesTableView *tv, NoteObject *note, NSInteger row);
+	id labelColumnCellForNote(NotesTableView *tv, NoteObject *note, NSInteger row);
+	id dateCreatedStringOfNote(NotesTableView *tv, NoteObject *note, NSInteger row);
+	id dateModifiedStringOfNote(NotesTableView *tv, NoteObject *note, NSInteger row);
+	id wordCountOfNote(NotesTableView *tv, NoteObject *note, NSInteger row);
 
 	void resetFoundPtrsForNote(NoteObject *note);
 	BOOL noteContainsUTF8String(NoteObject *note, NoteFilterContext *context);
 	BOOL noteTitleHasPrefixOfUTF8String(NoteObject *note, const char* fullString, size_t stringLen);
-	BOOL noteTitleMatchesUTF8String(NoteObject *note, const char* fullString);
+	BOOL noteTitleIsAPrefixOfOtherNoteTitle(NoteObject *longerNote, NoteObject *shorterNote);
 
 - (id)delegate;
 - (void)setDelegate:(id)theDelegate;
-- (id)initWithNoteBody:(NSAttributedString*)bodyText title:(NSString*)aNoteTitle uniqueFilename:(NSString*)aFilename format:(int)formatID;
+- (id)initWithNoteBody:(NSAttributedString*)bodyText title:(NSString*)aNoteTitle 
+			  delegate:(id)aDelegate format:(int)formatID labels:(NSString*)aLabelString;
 - (id)initWithCatalogEntry:(NoteCatalogEntry*)entry delegate:(id)aDelegate;
 
 - (NSSet*)labelSet;
@@ -138,7 +155,14 @@ NSInteger compareFileSize(id *a, id *b);
 - (void)replaceMatchingLabel:(LabelObject*)label;
 - (void)updateLabelConnectionsAfterDecoding;
 - (void)updateLabelConnections;
+- (void)disconnectLabels;
+- (BOOL)_setLabelString:(NSString*)newLabelString;
 - (void)setLabelString:(NSString*)newLabels;
+- (NSMutableSet*)labelSetFromCurrentString;
+- (NSArray*)orderedLabelTitles;
+- (NSSize)sizeOfLabelBlocks;
+- (void)_drawLabelBlocksInRect:(NSRect)aRect rightAlign:(BOOL)onRight highlighted:(BOOL)isHighlighted getSizeOnly:(NSSize*)reqSize;
+- (void)drawLabelBlocksInRect:(NSRect)aRect rightAlign:(BOOL)onRight highlighted:(BOOL)isHighlighted;
 
 - (void)setSyncObjectAndKeyMD:(NSDictionary*)aDict forService:(NSString*)serviceName;
 - (void)removeAllSyncMDForService:(NSString*)serviceName;
@@ -153,10 +177,11 @@ NSInteger compareFileSize(id *a, id *b);
 - (BOOL)upgradeEncodingToUTF8;
 - (BOOL)updateFromFile;
 - (BOOL)updateFromCatalogEntry:(NoteCatalogEntry*)catEntry;
-- (BOOL)updateFromData:(NSMutableData*)data;
+- (BOOL)updateFromData:(NSMutableData*)data inFormat:(int)fmt;
 
 - (OSStatus)writeFileDatesAndUpdateTrackingInfo;
 
+- (NSURL*)uniqueNoteLink;
 - (NSString*)noteFilePath;
 - (void)invalidateFSRef;
 
@@ -173,6 +198,8 @@ NSInteger compareFileSize(id *a, id *b);
 
 - (OSStatus)exportToDirectoryRef:(FSRef*)directoryRef withFilename:(NSString*)userFilename usingFormat:(int)storageFormat overwrite:(BOOL)overwrite;
 - (NSRange)nextRangeForWords:(NSArray*)words options:(unsigned)opts range:(NSRange)inRange;
+- (void)editExternallyUsingEditor:(ExternalEditor*)ed;
+- (void)abortEditingInExternalEditor;
 
 - (void)setFilenameFromTitle;
 - (void)setFilename:(NSString*)aString withExternalTrigger:(BOOL)externalTrigger;
@@ -185,6 +212,8 @@ NSInteger compareFileSize(id *a, id *b);
 - (NSAttributedString*)contentString;
 - (NSAttributedString*)printableStringRelativeToBodyFont:(NSFont*)bodyFont;
 - (NSString*)combinedContentWithContextSeparator:(NSString*)sepWContext;
+- (void)setForegroundTextColorOnly:(NSColor*)aColor;
+- (void)_resanitizeContent;
 - (void)updateUnstyledTextWithBaseFont:(NSFont*)baseFont;
 - (void)updateDateStrings;
 - (void)setDateModified:(CFAbsoluteTime)newTime;
@@ -192,6 +221,8 @@ NSInteger compareFileSize(id *a, id *b);
 - (void)setSelectedRange:(NSRange)newRange;
 - (NSRange)lastSelectedRange;
 - (BOOL)contentsWere7Bit;
+- (void)addPrefixParentNote:(NoteObject*)aNote;
+- (void)removeAllPrefixParentNotes;
 
 - (NSUndoManager*)undoManager;
 - (void)_undoManagerDidChange:(NSNotification *)notification;

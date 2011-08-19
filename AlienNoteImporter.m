@@ -23,7 +23,9 @@
 #import "GlobalPrefs.h"
 #import "AttributedPlainText.h"
 #import "NSData_transformations.h"
+#import "NSCollection_utils.h"
 #import "NSString_NV.h"
+#import "NSFileManager_NV.h"
 #import "NotationPrefs.h"
 #import "NotationController.h"
 #import "NoteObject.h"
@@ -225,15 +227,20 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 		if (filename) {
 			NSArray *notes = [self notesInFile:filename];
 			if ([notes count]) {
-				
-				NSMutableAttributedString *content = [[[[notes lastObject] contentString] mutableCopy] autorelease];
+				NSMutableAttributedString *content = [[[GlobalPrefs defaultPrefs] pastePreservesStyle] ? [[[notes lastObject] contentString] mutableCopy] :
+													  [[NSMutableAttributedString alloc] initWithString:[[[notes lastObject] contentString] string]] autorelease];
 				if ([[[content string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]) {
 					//only add string if it has at least one non-whitespace character
-					[content prefixWithSourceString:[[getter url] absoluteString]];
+					NSUInteger prefixedSourceLength = [[content prefixWithSourceString:[[getter url] absoluteString]] length];
 					[content santizeForeignStylesForImporting];
 					
 					[[notes lastObject] setContentString:content];
 					if ([getter userData]) [[notes lastObject] setTitleString:[getter userData]];
+					
+					//prefixing should push existing selections forward:
+					NSRange selRange = [[notes lastObject] lastSelectedRange];
+					if (selRange.length && prefixedSourceLength)
+						[[notes lastObject] setSelectedRange:NSMakeRange(selRange.location + prefixedSourceLength, selRange.length)];
 					
 					[receptionDelegate noteImporter:self importedNotes:notes];
 					
@@ -249,7 +256,7 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 				[newString santizeForeignStylesForImporting];
 				
 				NoteObject *noteObject = [[NoteObject alloc] initWithNoteBody:newString title:[getter userData] ? [getter userData] : urlString
-															   uniqueFilename:nil format:SingleDatabaseFormat];
+																	 delegate:nil format:SingleDatabaseFormat labels:nil];
 				
 				[receptionDelegate noteImporter:self importedNotes:[NSArray arrayWithObject:noteObject]];
 				[noteObject autorelease];
@@ -320,11 +327,21 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 	NSString *sourceIdentifierString = nil;
 	
 	NSMutableAttributedString *attributedStringFromData = nil;
-	
+
 	if (fileType == HTML_TYPE_ID || [extension isEqualToString:@"htm"] || [extension isEqualToString:@"html"] || [extension isEqualToString:@"shtml"]) {
 		//should convert to text with markdown here
-		attributedStringFromData = [[NSMutableAttributedString alloc] initWithHTML:[NSData uncachedDataFromFile:filename] documentAttributes:NULL];
-		
+        if ([[GlobalPrefs defaultPrefs] useMarkdownImport]) {
+			if ([[GlobalPrefs defaultPrefs] useReadability] || [self shouldUseReadability]) {
+				attributedStringFromData = [[NSMutableAttributedString alloc] initWithString:[self contentUsingReadability:filename] 
+																				  attributes:[[GlobalPrefs defaultPrefs] noteBodyAttributes]];
+			} else {
+				attributedStringFromData = [[NSMutableAttributedString alloc] initWithString:[self markdownFromHTMLFile:filename] 
+																				  attributes:[[GlobalPrefs defaultPrefs] noteBodyAttributes]];
+			}
+        } else {
+			attributedStringFromData = [[NSMutableAttributedString alloc] initWithHTML:[NSData uncachedDataFromFile:filename] 
+                                                                               options:[NSDictionary optionsDictionaryWithTimeout:10.0] documentAttributes:NULL];
+        }		
 	} else if (fileType == RTF_TYPE_ID || [extension isEqualToString:@"rtf"] || [extension isEqualToString:@"nvhelp"] || [extension isEqualToString:@"rtx"]) {
 		attributedStringFromData = [[NSMutableAttributedString alloc] initWithRTF:[NSData uncachedDataFromFile:filename] documentAttributes:NULL];
 		
@@ -390,28 +407,34 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 	if (attributedStringFromData) {
 		[attributedStringFromData trimLeadingWhitespace];
 		[attributedStringFromData removeAttachments];
-		[attributedStringFromData santizeForeignStylesForImporting];
-		
 		
 		NSString *processedFilename = [[filename lastPathComponent] stringByDeletingPathExtension];
-		
-		NSUInteger bodyLoc = 0;
-		NSString *title = [[attributedStringFromData string] syntheticTitleAndSeparatorWithContext:NULL bodyLoc:&bodyLoc oldTitle:nil];
+		NSUInteger bodyLoc = 0, prefixedSourceLength = 0;
+		NSString *title = [[attributedStringFromData string] syntheticTitleAndSeparatorWithContext:NULL bodyLoc:&bodyLoc maxTitleLen:36];
 		
 		//if the synthetic title (generally the first line of the content) is shorter than the filename itself, just use the filename as the title
 		//(or if this is a special case and we know the filename should be used)
-		if ([processedFilename length] > [title length] || [extension isEqualToString:@"nvhelp"]) {
+		if ([processedFilename length] > [title length] || [extension isEqualToString:@"nvhelp"] || [title isAMachineDirective] || 
+			[title isEqualToString:NSLocalizedString(@"Untitled Note", @"Title of a nameless note")]) {
 			title = processedFilename;
+			bodyLoc = 0;
 		} else {
-			if (bodyLoc > 0 && [attributedStringFromData length] >= bodyLoc) [attributedStringFromData deleteCharactersInRange:NSMakeRange(0, bodyLoc)];
+			title = [title stringByAppendingFormat:@" (%@)", processedFilename];
 		}
 		if ([sourceIdentifierString length])
-			[attributedStringFromData prefixWithSourceString:sourceIdentifierString];
+			prefixedSourceLength = [[attributedStringFromData prefixWithSourceString:sourceIdentifierString] length];
+		[attributedStringFromData santizeForeignStylesForImporting];
+		
 		[attributedStringFromData autorelease];
 		
+		//transfer any openmeta tags associated with this file as tags for the new note
+		NSArray *openMetaTags = [[NSFileManager defaultManager] getOpenMetaTagsAtFSPath:[filename fileSystemRepresentation]];
+		
 		//we do not also use filename as uniqueFilename, as we are only importing--not taking ownership
-		NoteObject *noteObject = [[NoteObject alloc] initWithNoteBody:attributedStringFromData title:title uniqueFilename:nil format:SingleDatabaseFormat];				
+		NoteObject *noteObject = [[NoteObject alloc] initWithNoteBody:attributedStringFromData title:title delegate:nil 
+															   format:SingleDatabaseFormat labels:[openMetaTags componentsJoinedByString:@" "]];				
 		if (noteObject) {
+			if (bodyLoc > 0 && [attributedStringFromData length] >= bodyLoc + prefixedSourceLength) [noteObject setSelectedRange:NSMakeRange(prefixedSourceLength, bodyLoc)];
 			if (shouldGrabCreationDates) {
 				[noteObject setDateAdded:CFDateGetAbsoluteTime((CFDateRef)[attributes objectForKey:NSFileCreationDate])];
 			}
@@ -472,6 +495,122 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 	return nil;
 }
 
+- (NSString *) contentUsingReadability: (NSString *)htmlFile
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSString *readabilityPath;
+    readabilityPath = [bundle pathForAuxiliaryExecutable: @"readability.py"];
+	
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath: readabilityPath];
+	
+	NSArray *arguments;
+    arguments = [NSArray arrayWithObjects: htmlFile, nil];
+    [task setArguments: arguments];
+	
+	NSPipe *rpipe;
+    rpipe = [NSPipe pipe];
+    [task setStandardOutput: rpipe];
+	
+    NSFileHandle *file;
+    file = [rpipe fileHandleForReading];
+	
+    [task launch];
+	
+    NSData *data;
+    data = [file readDataToEndOfFile];
+	
+    NSString *string;
+    string = [[NSString alloc] initWithData: data
+								   encoding: NSUTF8StringEncoding];
+
+	return [self markdownFromSource:string];
+}
+
+- (NSString *) markdownFromHTMLFile: (NSString *)htmlFile
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSString *readabilityPath;
+    readabilityPath = [bundle pathForAuxiliaryExecutable: @"html2text.py"];
+	
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath: readabilityPath];
+	
+	NSArray *arguments;
+    arguments = [NSArray arrayWithObjects: htmlFile, nil];
+    [task setArguments: arguments];
+	
+	NSPipe *rpipe;
+    rpipe = [NSPipe pipe];
+    [task setStandardOutput: rpipe];
+	
+    NSFileHandle *file;
+    file = [rpipe fileHandleForReading];
+	
+    [task launch];
+	
+    NSData *data;
+    data = [file readDataToEndOfFile];
+	
+    NSString *string;
+    string = [[NSString alloc] initWithData: data
+								   encoding: NSUTF8StringEncoding];
+	
+	return string;
+}
+
+- (NSString *) markdownFromSource: (NSString *)htmlString
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSString *readabilityPath;
+    readabilityPath = [bundle pathForAuxiliaryExecutable: @"html2text.py"];
+	
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath: readabilityPath];
+	
+    NSPipe *readPipe = [NSPipe pipe];
+    NSFileHandle *readHandle = [readPipe fileHandleForReading];
+	
+    NSPipe *writePipe = [NSPipe pipe];
+    NSFileHandle *writeHandle = [writePipe fileHandleForWriting];
+	
+    [task setStandardInput: writePipe];
+    [task setStandardOutput: readPipe];
+	
+    [task launch];
+	
+    [writeHandle writeData: [htmlString dataUsingEncoding: NSASCIIStringEncoding]];
+    [writeHandle closeFile];
+	
+    NSMutableData *data = [[NSMutableData alloc] init];
+    NSData *readData;
+	
+    while ((readData = [readHandle availableData])
+           && [readData length]) {
+        [data appendData: readData];
+    }
+	
+    NSString *strippedString;
+    strippedString = [[NSString alloc]
+					  initWithData: data
+					  encoding: NSASCIIStringEncoding];
+	
+    [task release];
+    [data release];
+    [strippedString autorelease];
+	
+    return (strippedString);
+}
+-(BOOL)shouldUseReadability
+{
+    return shouldUseReadability;
+}
+
+-(void) setShouldUseReadability:(BOOL)value
+{
+	shouldUseReadability = value;
+}
+
 @end
 
 @implementation AlienNoteImporter (Private)
@@ -501,7 +640,8 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 				[attributedString santizeForeignStylesForImporting];
 				NSString *syntheticTitle = [attributedString trimLeadingSyntheticTitle];
 				
-				NoteObject *noteObject = [[[NoteObject alloc] initWithNoteBody:attributedString title:syntheticTitle uniqueFilename:nil format:SingleDatabaseFormat] autorelease];				
+				NoteObject *noteObject = [[[NoteObject alloc] initWithNoteBody:attributedString title:syntheticTitle 
+																	  delegate:nil format:SingleDatabaseFormat labels:nil] autorelease];
 				if (noteObject) {
 					[noteObject setDateAdded:CFDateGetAbsoluteTime((CFDateRef)[doc creationDate])];
 					[noteObject setDateModified:CFDateGetAbsoluteTime((CFDateRef)[doc modificationDate])];
@@ -616,8 +756,9 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
             NSString *title = [fields objectAtIndex:0];
 			NSMutableAttributedString *attributedBody = [[[NSMutableAttributedString alloc] initWithString:s attributes:[[GlobalPrefs defaultPrefs] noteBodyAttributes]] autorelease];
 			[attributedBody addLinkAttributesForRange:NSMakeRange(0, [attributedBody length])];
+			[attributedBody addStrikethroughNearDoneTagsForRange:NSMakeRange(0, [attributedBody length])];
 			
-            NoteObject *note = [[[NoteObject alloc] initWithNoteBody:attributedBody title:title uniqueFilename:nil format:SingleDatabaseFormat] autorelease];
+            NoteObject *note = [[[NoteObject alloc] initWithNoteBody:attributedBody title:title delegate:nil format:SingleDatabaseFormat labels:nil] autorelease];
 			if (note) {
 				now += 1.0; //to ensure a consistent sort order
 				[note setDateAdded:now];

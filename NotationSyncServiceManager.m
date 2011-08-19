@@ -58,6 +58,17 @@
 	return dict;
 }
 
+- (NoteObject*)noteForKey:(NSString*)key ofServiceClass:(Class<SyncServiceSession>)serviceClass {
+	NSUInteger i = 0;
+	for (i=0; i<[allNotes count]; i++) {
+		NoteObject *note = [allNotes objectAtIndex:i];
+		if ([[[[note syncServicesMD] objectForKey:[serviceClass serviceName]] 
+			  objectForKey:[serviceClass nameOfKeyElement]] isEqualToString:key])
+			return note;
+	}
+	return nil;
+}
+
 - (void)startSyncServices {
 	[syncSessionController setSyncDelegate:self];
 	[syncSessionController initializeAllServices];
@@ -148,6 +159,10 @@
 						[locallyChangedNotes addObject:note];
 					} else if (changeDiff == NSOrderedAscending) {
 						[remotelyChangedNotes addObject:note];
+					} else {
+						//if the note is considered unchanged, still give the sync service an
+						//opportunity to update metadata/tags with info returned by the list
+						[syncSession applyMetadataUpdatesToNote:note localEntry:thisServiceInfo remoteEntry:remoteInfo];
 					}
 				} else if (changeDiff != NSOrderedDescending) {
 					//nah ah ah, a delete should not stick if local mod time is newer! otherwise local changes will be lost

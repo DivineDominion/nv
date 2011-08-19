@@ -44,12 +44,16 @@
 }
 
 - (id)initWithURL:(NSURL*)aURL POSTData:(NSData*)POSTData delegate:(id)aDelegate {
-	
+	return [self initWithURL:aURL POSTData:POSTData contentType:nil delegate:aDelegate];
+}
+
+- (id)initWithURL:(NSURL*)aURL POSTData:(NSData*)POSTData contentType:(NSString*)contentType delegate:(id)aDelegate {
 	if ([self init]) {
 		receivedData = [[NSMutableData alloc] init];
 		requestURL = [aURL retain];
 		delegate = aDelegate;
 		dataToSend = [POSTData retain];
+		dataToSendContentType = [contentType copy];
 	}
 	return self;
 }
@@ -84,10 +88,14 @@
 	}
 	
 	[request setHTTPShouldHandleCookies:NO];
-	[request addValue:@"Sinus cardinalis NV 2.0B3" forHTTPHeaderField:@"User-agent"];
+	[request addValue:@"Sinus cardinalis NV 2.0B4" forHTTPHeaderField:@"User-agent"];
 	
 	//if POSTData is nil, do a plain GET request
 	if (dataToSend) {
+		if (dataToSendContentType) {
+			[request addValue:dataToSendContentType forHTTPHeaderField:@"Content-Type"];
+		}
+		
 		[request setHTTPBody:dataToSend];
 		[request setHTTPMethod:@"POST"];
 	}
@@ -131,6 +139,7 @@
 - (void)dealloc {
 	
 	[dataToSend release];
+	[dataToSendContentType release];
 	[requestURL release];
 	[receivedData release];
 	[urlConnection release];
