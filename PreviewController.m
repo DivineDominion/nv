@@ -16,6 +16,7 @@
 #import "ETTransparentButton.h"
 #import "BTTransparentScroller.h"
 #import "NSFileManager_NV.h"
+#import "GlobalPrefs.h"
 
 #define kDefaultMarkupPreviewVisible @"markupPreviewVisible"
 
@@ -334,45 +335,105 @@
 		//	}
 }
 
--(void)preview:(id)object
+- (void)preview:(id)object
 {
-	if (self.isPreviewSticky) {
-    return;
-  }
-		NSString *lastScrollPosition = [preview stringByEvaluatingJavaScriptFromString:@"document.getElementsByTagName('body')[0].scrollTop"];
-//	NSString *lastScrollPosition = [[preview windowScriptObject] evaluateWebScript:@"document.getElementsByTagName('body')[0].scrollTop"];
-	AppController *app = object;
-	NSString *rawString = [app noteContent];
-
-	SEL mode = [self markupProcessorSelector:[app currentPreviewMode]];
-	NSString *processedString = [NSString performSelector:mode withObject:rawString];
-  NSString *previewString = processedString;
-	NSMutableString *outputString = [NSMutableString stringWithString:(NSString *)htmlString];
-	NSString *noteTitle =  ([app selectedNoteObject]) ? [NSString stringWithFormat:@"%@",titleOfNote([app selectedNoteObject])] : @"";
-
-	if (lastNote == [app selectedNoteObject]) {
-		NSString *restoreScrollPosition = [NSString stringWithFormat:@"\n<script>var body = document.getElementsByTagName('body')[0],oldscroll = %@;body.scrollTop = oldscroll;</script>",lastScrollPosition];
-		previewString = [processedString stringByAppendingString:restoreScrollPosition];
-	} else {
-		[cssString release];
-		[htmlString release];
-		cssString = [[[self class] css] retain];
-		htmlString = [[[self class] html] retain];
-		lastNote = [app selectedNoteObject];
-	}
-		NSString *nvSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
-
-	[outputString replaceOccurrencesOfString:@"{%support%}" withString:nvSupportPath options:0 range:NSMakeRange(0, [outputString length])];
-	[outputString replaceOccurrencesOfString:@"{%title%}" withString:noteTitle options:0 range:NSMakeRange(0, [outputString length])];
-	[outputString replaceOccurrencesOfString:@"{%content%}" withString:previewString options:0 range:NSMakeRange(0, [outputString length])];
-	[outputString replaceOccurrencesOfString:@"{%style%}" withString:cssString options:0 range:NSMakeRange(0, [outputString length])];
-
-	[[preview mainFrame] loadHTMLString:outputString baseURL:nil];
-	[preview stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"var body = document.getElementsByTagName('body')[0],oldscroll = %@;body.scrollTop = oldscroll;",lastScrollPosition]];
-  [[self window] setTitle:noteTitle];
-
-	[sourceView replaceCharactersInRange:NSMakeRange(0, [[sourceView string] length]) withString:processedString];
+    if (self.isPreviewSticky) {
+        return;
+    }
+    NSString *lastScrollPosition = [preview stringByEvaluatingJavaScriptFromString:@"document.getElementsByTagName('body')[0].scrollTop"];
+    //	NSString *lastScrollPosition = [[preview windowScriptObject] evaluateWebScript:@"document.getElementsByTagName('body')[0].scrollTop"];
+    AppController *app = object;
+    NSString *rawString = [app noteContent];
+    
+    SEL mode = [self markupProcessorSelector:[app currentPreviewMode]];
+    NSString *processedString = [NSString performSelector:mode withObject:rawString];
+    NSString *previewString = processedString;
+    NSMutableString *outputString = [NSMutableString stringWithString:(NSString *)htmlString];
+    
+    NoteObject *currentNote = [app selectedNoteObject];
+    
+    if (lastNote == currentNote) {
+        NSString *restoreScrollPosition = [NSString stringWithFormat:@"\n<script>var body = document.getElementsByTagName('body')[0],oldscroll = %@;body.scrollTop = oldscroll;</script>",lastScrollPosition];
+        previewString = [processedString stringByAppendingString:restoreScrollPosition];
+    } else {
+        [cssString release];
+        [htmlString release];
+        cssString = [[[self class] css] retain];
+        htmlString = [[[self class] html] retain];
+        lastNote = [app selectedNoteObject];
+    }
+    NSString *nvSupportPath = [[NSFileManager defaultManager] applicationSupportDirectory];
+    
+    NSString *noteTitle = @"";
+    NSString *fileBasePath = @"";
+    
+    if (currentNote) {
+        noteTitle = [NSString stringWithFormat:@"%@", titleOfNote(currentNote)];
+        
+        // It is hell to obtain the path through the app itself, so bypass
+        // everything and get it from the prefs.
+        
+        NSString *notesPath = [self notesPathFromPreferences];
+        NSString *fileName = [NSString stringWithFormat:@"%@", filenameOfNote(currentNote)];
+        NSString *noteFilePath = [notesPath stringByAppendingPathComponent:fileName];
+        NSString *URLSafeNoteFilePath = [noteFilePath stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPathAllowedCharacterSet]];
+        fileBasePath = [NSString stringWithFormat:@"file://%@", URLSafeNoteFilePath];
+    }
+    
+    NSDictionary *replacements = @{@"{%support%}": nvSupportPath,
+                                   @"{%baseref%}": fileBasePath,
+                                   @"{%title%}": noteTitle,
+                                   @"{%content%}": processedString,
+                                   @"{%style%}": cssString};
+    
+    [replacements enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *replacement, BOOL *stop) {
+        
+        NSRange fullRange = NSMakeRange(0, [outputString length]);
+        [outputString replaceOccurrencesOfString:key
+                                      withString:replacement
+                                         options:0
+                                           range:fullRange];
+    }];
+    
+    
+    [[preview mainFrame] loadHTMLString:outputString baseURL:nil];
+    [preview stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"var body = document.getElementsByTagName('body')[0],oldscroll = %@;body.scrollTop = oldscroll;",lastScrollPosition]];
+    [[self window] setTitle:noteTitle];
+    
+    [sourceView replaceCharactersInRange:NSMakeRange(0, [[sourceView string] length]) withString:processedString];
     self.isPreviewOutdated = NO;
+}
+
+- (NSString *)notesPathFromPreferences
+{
+    NSData *aliasData = [[GlobalPrefs defaultPrefs] aliasDataForDefaultDirectory];
+    
+    if (!aliasData) {
+        return nil;
+    }
+    
+    OSStatus anErr = noErr;
+    AliasHandle aliasHandle;
+    
+    if (PtrToHand([aliasData bytes], (Handle*)&aliasHandle, [aliasData length]) != noErr) {
+        return nil;
+    }
+    
+    FSRef targetRef;
+    Boolean changed;
+    
+    if (FSResolveAliasWithMountFlags(NULL, aliasHandle, &targetRef, &changed, 0) != noErr) {
+        return nil;
+    }
+    
+    char path[MAXPATHLEN];
+    if (FSRefMakePath(&targetRef, (UInt8 *)path, MAXPATHLEN) != noErr) {
+        return nil;
+    }
+    
+    NSString *nsPath = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:path length:strlen(path)];
+    NSString *fullPath = [nsPath stringByStandardizingPath];
+    return fullPath;
 }
 
 -(SEL)markupProcessorSelector:(NSInteger)previewMode
